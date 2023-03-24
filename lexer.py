@@ -7,7 +7,7 @@ import re
 data = """
 
     def int main() {
-        var str x = "hel\"lo";
+        var str x = "hello";
     }
 
     # def int sum(vector numList) {
@@ -114,10 +114,6 @@ reserved = {
     'read' : 'READ',
     'write' : 'WRITE',
     'type' : 'TYPE',
-    #'List' : 'LIST',
-    # 'or' : 'OR',
-    # 'and' : 'AND',
-    # 'not' : 'NOT',
 }
 
 tokens = [
@@ -194,39 +190,10 @@ t_PERIOD           = r'\.'
 t_SEMI             = r';'
 t_COLON            = r':'
 
-# Identifiers
-# t_ID = r'[A-Za-z_][A-Za-z0-9_]*'
-
-# Integer literal
-# t_INTEGER = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
-
-# Floating literal
-# t_FLOAT = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
-
 # String literal - (x|y) where x shouldn't match \ , \n , "
 t_STRING = r'\"([^\\\n]|(\\.))*?\"'
-# t_STRING = r'\"([^\\\n\"]|(\\.))*\"'
-# print("hel\"lo")
 
-# def t_STRING(t):
-#     r'"([^"\\]|\\.)*"'
-#     t.value = re.sub(r'\\(")', r'\1', t.value[1:-1])
-#     return t
 
-# Character constant 'c' or L'c'
-#t_CHARACTER = r'(L)?\'([^\\\n]|(\\.))*?\''
-
-"""
-def t_FLOAT(t):
-    r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
-    t.value = float(t.value)
-    return t
-
-def t_INTEGER(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-"""
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
