@@ -20,7 +20,7 @@ data = """
     #     return result;
     # }
 
-    # def str concatinate(int lenghtOfString) {
+    # def str concatenate(int lengthOfString) {
     #     int i = 0;
     #     var vector b = [1, 2, 3, 4];
     #     while (i++ < lengthOfString) {
