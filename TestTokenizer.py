@@ -141,6 +141,34 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(token_list[13].value, ';')
         self.assertEqual(token_list[14].type, 'RBRACE')
         self.assertEqual(token_list[14].value, '}')
-    
+
+    def test_line_number(self):
+        data = '''
+        def int main() {
+
+
+
+
+            var int y = 1;
+        }
+        '''
+
+        tokenizer = Tokenizer()
+        token_list = tokenizer.tokenize(data)
+        
+        # 6 tokens in line 2
+        i = 0
+        while i < 6:
+            self.assertEqual(token_list[i].lineno, 2)
+            i += 1
+        # 5 tokens in line 7
+        while i < 12:
+            self.assertEqual(token_list[i].lineno, 7)
+            i += 1
+        # 1 token in line 8
+        while i < 13:
+            self.assertEqual(token_list[i].lineno, 8)
+            i += 1 
+
 if __name__ == '__main__':
     unittest.main()

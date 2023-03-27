@@ -141,7 +141,6 @@ class Tokenizer:
             if not tok:
                 break
             token_list.append(tok)
-            print(tok)
         return token_list
 
     def t_NUMBER(self, t):
