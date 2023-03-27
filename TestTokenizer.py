@@ -104,7 +104,7 @@ class TestTokenizer(unittest.TestCase):
     
     def test_reserved(self):
         data = '''
-        def int main() {
+        def int main(str something) {
             var int x = 0;
         }
         '''
@@ -119,24 +119,28 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(token_list[2].value, 'main')
         self.assertEqual(token_list[3].type, 'LPAREN')
         self.assertEqual(token_list[3].value, '(')
-        self.assertEqual(token_list[4].type, 'RPAREN')
-        self.assertEqual(token_list[4].value, ')')
-        self.assertEqual(token_list[5].type, 'LBRACE')
-        self.assertEqual(token_list[5].value, '{')
-        self.assertEqual(token_list[6].type, 'VAR')
-        self.assertEqual(token_list[6].value, 'var')
-        self.assertEqual(token_list[7].type, 'INT')
-        self.assertEqual(token_list[7].value, 'int')
-        self.assertEqual(token_list[8].type, 'ID')
-        self.assertEqual(token_list[8].value, 'x')
-        self.assertEqual(token_list[9].type, 'EQUALS')
-        self.assertEqual(token_list[9].value, '=')
-        self.assertEqual(token_list[10].type, 'NUMBER')
-        self.assertEqual(token_list[10].value, 0)
-        self.assertEqual(token_list[11].type, 'SEMI')
-        self.assertEqual(token_list[11].value, ';')
-        self.assertEqual(token_list[12].type, 'RBRACE')
-        self.assertEqual(token_list[12].value, '}')
+        self.assertEqual(token_list[4].type, 'STR')
+        self.assertEqual(token_list[4].value, 'str')
+        self.assertEqual(token_list[5].type, 'ID')
+        self.assertEqual(token_list[5].value, 'something')
+        self.assertEqual(token_list[6].type, 'RPAREN')
+        self.assertEqual(token_list[6].value, ')')
+        self.assertEqual(token_list[7].type, 'LBRACE')
+        self.assertEqual(token_list[7].value, '{')
+        self.assertEqual(token_list[8].type, 'VAR')
+        self.assertEqual(token_list[8].value, 'var')
+        self.assertEqual(token_list[9].type, 'INT')
+        self.assertEqual(token_list[9].value, 'int')
+        self.assertEqual(token_list[10].type, 'ID')
+        self.assertEqual(token_list[10].value, 'x')
+        self.assertEqual(token_list[11].type, 'EQUALS')
+        self.assertEqual(token_list[11].value, '=')
+        self.assertEqual(token_list[12].type, 'NUMBER')
+        self.assertEqual(token_list[12].value, 0)
+        self.assertEqual(token_list[13].type, 'SEMI')
+        self.assertEqual(token_list[13].value, ';')
+        self.assertEqual(token_list[14].type, 'RBRACE')
+        self.assertEqual(token_list[14].value, '}')
     
 if __name__ == '__main__':
     unittest.main()
