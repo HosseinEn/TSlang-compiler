@@ -143,6 +143,15 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(token_list[14].value, '}')
 
     def test_line_number(self):
+        def assert_with_while(number_of_tokens, lineno):
+            nonlocal counter
+            bound = counter + number_of_tokens
+            while counter < bound:
+                print(token_list[counter].lineno, lineno)
+                self.assertEqual(token_list[counter].lineno, lineno)
+                counter += 1
+
+
         data = '''
         def int main() {
 
@@ -155,20 +164,15 @@ class TestTokenizer(unittest.TestCase):
 
         tokenizer = Tokenizer()
         token_list = tokenizer.tokenize(data)
-        
+
+        counter = 0
         # 6 tokens in line 2
-        i = 0
-        while i < 6:
-            self.assertEqual(token_list[i].lineno, 2)
-            i += 1
-        # 5 tokens in line 7
-        while i < 12:
-            self.assertEqual(token_list[i].lineno, 7)
-            i += 1
+        assert_with_while(6, 2)
+        # 6 tokens in line 7
+        assert_with_while(6, 7)
         # 1 token in line 8
-        while i < 13:
-            self.assertEqual(token_list[i].lineno, 8)
-            i += 1 
+        assert_with_while(1, 8)
+
 
 if __name__ == '__main__':
     unittest.main()
