@@ -141,6 +141,7 @@ class Tokenizer:
             if not tok:
                 break
             token_list.append(tok)
+            print(tok)
         return token_list
 
     def t_NUMBER(self, t):
@@ -150,7 +151,8 @@ class Tokenizer:
     
     def t_STRING(self, t):
         # String literal - (x|y) where x shouldn't match \ , \n , "
-        r'\"([^\\\n]|(\\.))*?\"'
+        # TODO - Handle the case where string started with " but not ended with " or started with ' but not ended with '
+        r'[\"\']([^\\\n]|(\\.))*?[\"\']'
         t.value = re.sub(r'\\', r'', t.value[1:-1])
         return t
 
@@ -177,7 +179,8 @@ class Tokenizer:
 
 data = """
     def int main() {
-        var str x = "hello";
+        # var str x = "hello";
+        text = 'x = \\"hello world\\" y = \\"my name is \\"Alice\\"! How do you do?\\"'
     }
 
     # def int sum(vector numList) {
@@ -224,11 +227,6 @@ data = """
 """
 tokenizer = Tokenizer()
 token_list = tokenizer.tokenize(data)
-
-
-
-
-
 
 
 

@@ -58,7 +58,7 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(token_list[12].type, 'RBRACE')
         self.assertEqual(token_list[12].value, '}')
 
-    def test_escape_double_quote(self):
+    def test_double_quote_escape(self):
         data = '''
         def int main() {
             var str x = "hello\\" world";
