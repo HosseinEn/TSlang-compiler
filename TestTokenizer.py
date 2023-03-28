@@ -1,3 +1,9 @@
+"""
+    exec: python3 TestTokenizer.py
+"""
+
+
+
 import unittest
 from lexer import Tokenizer
 
