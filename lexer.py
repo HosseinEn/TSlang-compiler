@@ -57,8 +57,8 @@ class Tokenizer:
     }
 
     tokens = [
-        # Literals (identifier, integer constant, float constant, string constant, char const)
-        'ID', 'TYPEID', 'NUMBER', 'STRING', 'CHARACTER',
+        # Literals (identifier, integer constant, float constant, string constant)
+        'ID', 'TYPEID', 'NUMBER', 'STRING', 
 
         # Operators (+,-,*,/,%,|,&,~,^,<<,>>, ||, &&, !, <, <=, >, >=, ==, !=)
         'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
@@ -104,7 +104,6 @@ class Tokenizer:
     t_NE               = r'!='
 
     # Assignment operators
-
     t_EQUALS           = r'='
     t_TIMESEQUAL       = r'\*='
     t_DIVEQUAL         = r'/='
@@ -150,9 +149,10 @@ class Tokenizer:
         return t
     
     def t_STRING(self, t):
-        # String literal - (x|y) where x shouldn't match \ , \n , "
-        # TODO - Handle the case where string started with " but not ended with " or started with ' but not ended with '
-        r'[\"\']([^\\\n]|(\\.))*?[\"\']'
+        # String literal - (x|y) where x shouldn't match \ , \n , ", '
+        # TODO - Handle the case where string started with " but 
+        # not ended with " or started with ' but not ended with '
+        r'[\"\']([^\\\'\"\n]|(\\.))*[\"\']'
         t.value = re.sub(r'\\', r'', t.value[1:-1])
         return t
 
@@ -172,15 +172,14 @@ class Tokenizer:
 
     # Error handler for illegal characters
     def t_error(self, t):
-        print(f'Illegal character {t.value[0]!r}')
+        print(f'Illegal character {t.value[0]!r} at line {t.lineno}')
         t.lexer.skip(1)
 
 
 
 data = """
     def int main() {
-        # var str x = "hello";
-        text = 'x = \\"hello world\\" y = \\"my name is \\"Alice\\"! How do you do?\\"'
+        var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
     }
 
     # def int sum(vector numList) {
