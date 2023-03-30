@@ -58,7 +58,7 @@ class Tokenizer:
 
     tokens = [
         # Literals (identifier, integer constant, float constant, string constant)
-        'ID', 'TYPEID', 'NUMBER', 'STRING', 
+        'ID', 'TYPEID', 'NUMBER', 'STRING',
 
         # Operators (+,-,*,/,%,|,&,~,^,<<,>>, ||, &&, !, <, <=, >, >=, ==, !=)
         'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
@@ -149,10 +149,10 @@ class Tokenizer:
         return t
     
     def t_STRING(self, t):
-        # String literal - (x|y) where x shouldn't match \ , \n , ", '
-        # TODO - Handle the case where string started with " but 
-        # not ended with " or started with ' but not ended with '
         r'[\"\']([^\\\'\"\n]|(\\.))*[\"\']'
+        if t.value[0] != t.value[-1]:
+            print(f'Illegal character {t.value[0]!r} at line {t.lineno}')
+            t.lexer.skip(1)
         t.value = re.sub(r'\\', r'', t.value[1:-1])
         return t
 
