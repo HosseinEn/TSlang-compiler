@@ -179,9 +179,17 @@ class Tokenizer:
 
 
 data = """
-    def int main() {
-        var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
-    }
+    # int main (void) {
+    #     int x = a546f;
+    #     int A[54a] = 5;
+    #     'A' = x;
+    #     if (x 10 {
+    #         retur 5;
+    #     }
+    # }
+    # def int main() {
+    #     var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
+    # }
 
     # def int sum(vector numList) {
     #     var int result = 0;
