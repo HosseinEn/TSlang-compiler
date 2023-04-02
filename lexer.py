@@ -150,7 +150,7 @@ class Tokenizer:
     
     def t_STRING(self, t):
         # String literal - (x|y) where x shouldn't match \ , \n , ", '
-        r'[\"\']([^\'\"\n\\]|(\\.))*[\"\']'
+        r'[\"\']([^\'\"\n\\]|(\\.))*?[\"\']'
         if t.value[0] != t.value[-1]:
             print(f'Illegal character {t.value[0]!r} at line {t.lineno}')
             t.lexer.skip(1)
