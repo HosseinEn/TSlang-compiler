@@ -5,7 +5,7 @@
 
 
 import unittest
-from lexer import Tokenizer
+from TeslangLexer import Tokenizer
 
 class TestTokenizer(unittest.TestCase):
     def test_comment(self):
