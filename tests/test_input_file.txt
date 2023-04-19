@@ -1,0 +1,7 @@
+#def int sayhello () {
+#
+#}
+
+def null caller() {
+    sayhello()
+}
