@@ -102,6 +102,7 @@ class TeslangParser(object):
 
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
+        p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
         '''return_instr : RETURN expr SEMI'''
@@ -131,8 +132,8 @@ class TeslangParser(object):
     # Rule 7
     def p_clist(self, p: yacc.YaccProduction):
         '''clist : empty
-                | expr
-                | expr COMMA clist'''
+                 | expr
+                 | expr COMMA clist'''
         # TODO check this out after defining functionCall
         if len(p) == 2:
             p[0] = ArgsList(exprs=[p[1]])
@@ -140,14 +141,6 @@ class TeslangParser(object):
             p[0] = ArgsList(exprs=p[3].exprs + [p[1]])
 
         
-
-    # Rule 8 
-    # def p_type(self, p: yacc.YaccProduction):
-    #     '''type : INT
-    #             | STR
-    #             | VECTOR
-    #             | NULL'''
-
 
     # Rule 9
     def p_expr(self, p: yacc.YaccProduction):    
@@ -185,10 +178,17 @@ class TeslangParser(object):
                 | binary_expr                     
                 | ID                               
                 | ID EQUALS expr                   
-                | ID LPAREN clist RPAREN  
+                | function_call 
                 | NUMBER                           
                 | STRING'''
+        # TODO what should be done for vector declaration?
         # TODO check vector out - expr [expr] and [clist]
+        p[0] = p[1]
+
+    def p_function_call(self, p: yacc.YaccProduction):
+        '''function_call : ID LPAREN clist RPAREN'''
+        p[0] = FunctionCall(id=p[1], args=p[3], pos=getPosition(p))
+
 
     def p_binary_expr(self, p: yacc.YaccProduction):
         '''binary_expr : expr PLUS expr                   
@@ -205,6 +205,7 @@ class TeslangParser(object):
                        | expr LOR expr                    
                        | expr LAND expr'''
         p[0] = BinExpr(left=p[1], op=p[2], right=p[3], pos=getPosition(p))
+        # logging.debug("Parsing function %s", p[2])
 
     # Rule 10
     def p_empty(self, p: yacc.YaccProduction):
@@ -221,24 +222,24 @@ class TeslangParser(object):
 
 if __name__ == "__main__":
 
-    data = open(sys.argv[1], 'r').read()
 
-
+    # Set up a logging object
+    import logging
     logging.basicConfig(
-        level=logging.DEBUG,
-        filename="../logs/parselog.txt",
-        filemode="w",
-        format="%(filename)10s:%(lineno)4d:%(message)s"
+        level = logging.DEBUG,
+        filename = "parselog.txt",
+        filemode = "w",
+        format = "%(filename)10s:%(lineno)4d:%(message)s"
     )
-
     log = logging.getLogger()
 
-
+    data = open(sys.argv[1], 'r').read()
     tParser = TeslangParser()
     # parser = yacc.yacc(debug=True, debuglog=log)
-    parser = yacc.yacc(module=tParser, debug=True, debuglog=log)
+    parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
 
     ast = parser.parse(data, lexer=tParser.scanner)
+
 
 
 

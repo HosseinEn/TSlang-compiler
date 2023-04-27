@@ -14,15 +14,6 @@ class Node(object):
       if meth!=None:
           return meth(self, table)
 
-  def iaccept(self, visitor):
-    result = visitor.visit(self)
-    if isinstance(result, list):
-        if result:
-            return result[0]
-        else:
-            return None
-    else:
-        return result
 
 
 class ErrorNode(Node):
@@ -67,9 +58,9 @@ class ExprList(Node):
     self.exprs = exprs
 
 class FunctionCall(Node):
-  def __init__(self, id, params, pos):
+  def __init__(self, id, args, pos):
     self.id = id
-    self.params = params
+    self.args = args
     self.pos = pos
 
 class FunctionDefList(Node):
@@ -164,17 +155,6 @@ class Assignment(Node):
     self.expr = expr
     self.pos = pos
 
-class LabeledInstruction(Node):
-  def __init__(self, kw, instr):
-    self.keyword = kw
-    self.instr = instr
-
-class RepeatInstruction(Node):
-  def __init__(self, kw_1, instrs, kw_2, cond ):
-      self.kw_1 = kw_1
-      self.kw_2 = kw_2
-      self.instrs = instrs
-      self.cond = cond
 
       
 class ArgsList(Node):
