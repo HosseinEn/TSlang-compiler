@@ -1,18 +1,18 @@
+from TeslangSemanticChecker import TeslangSemanticChecker
 
 class Node(object):
 
-  def __init__(self, node_info):
-      #if len(node_info) == 3:
-      self.lineno = node_info['lno']
-         #self.columnno = node_info['cno']
-         #self.ptype = node_info['ptype']
-    
-  def accept(self, visitor, table = None):
-      className = self.__class__.__name__
-      # return visitor.visit_<className>(self)
-      meth = getattr(visitor, 'visit_' + className, None)
-      if meth!=None:
-          return meth(self, table)
+    def __init__(self, node_info):
+        #if len(node_info) == 3:
+        self.lineno = node_info['lno']
+            #self.columnno = node_info['cno']
+            #self.ptype = node_info['ptype']
+        
+    def accept(self, table = None):
+        className = self.__class__.__name__
+        meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
+        if meth!=None:
+            return meth(self, table)
 
 
 
@@ -83,61 +83,57 @@ class Statement(Node):
     def __init__(self, statement):
       self.statement = statement
 
-class PrintInstruction(Node):
-  def __init__(self, expr):
-    self.expr = expr
-
 class ReturnInstruction(Node):
   def __init__(self, expr, pos):
     self.expr = expr
     self.pos = pos
 
-class DeclarationList(Node):
-  def __init__(self, decls):
-    self.decls = decls
+# class DeclarationList(Node):
+#   def __init__(self, decls):
+#     self.decls = decls
 
-class Declaration(Node):
-  def __init__(self, type, inits, pos):
-    self.type = type
-    self.inits = inits
-    self.pos = pos
+# class Declaration(Node):
+#   def __init__(self, type, inits, pos):
+#     self.type = type
+#     self.inits = inits
+#     self.pos = pos
 
-class InitList(Node):
-  def __init__(self, inits):
-    self.inits = inits
+# class InitList(Node):
+#   def __init__(self, inits):
+#     self.inits = inits
 
-class Init(Node):
-  def __init__(self, id, expr):
-    self.id = id
-    self.expr = expr
+# class Init(Node):
+#   def __init__(self, id, expr):
+#     self.id = id
+#     self.expr = expr
 
 class IfOrIfElseInstruction(Node):
-  def __init__(self, cond, if_statement, pos, else_statement = None):
-    self.cond = cond
-    self.if_statement = if_statement
-    self.else_statement = else_statement
-    self.pos = pos
+    def __init__(self, cond, if_statement, pos, else_statement = None):
+        self.cond = cond
+        self.if_statement = if_statement
+        self.else_statement = else_statement
+        self.pos = pos
 
 class WhileInstruction(Node):
-  def __init__(self, cond, while_statement):
-    self.cond = cond
-    self.while_statement = while_statement
+    def __init__(self, cond, while_statement):
+        self.cond = cond
+        self.while_statement = while_statement
 
 class ForInstruction(Node):
-  def __init__(self, start_expr, end_expr, for_statement, pos):
-    self.start_expr = start_expr
-    self.end_expr = end_expr
-    self.for_statement = for_statement
-    self.pos = pos
+    def __init__(self, start_expr, end_expr, for_statement, pos):
+        self.start_expr = start_expr
+        self.end_expr = end_expr
+        self.for_statement = for_statement
+        self.pos = pos
 
 
 class ContinueInstruction(Node):
-  def __init__(self):
-    pass
+    def __init__(self):
+        pass
 
 class BreakInstruction(Node):
-  def __init__(self):
-    pass
+    def __init__(self):
+        pass
 
 # class CompoundInstructions(Node):
 #   def __init__(self, decls, instrs):
@@ -150,22 +146,38 @@ class Body(Node):
         self.body = body
 
 class Assignment(Node):
-  def __init__(self, id, expr, pos):
-    self.id = id
-    self.expr = expr
-    self.pos = pos
+    def __init__(self, id, expr, pos):
+        self.id = id
+        self.expr = expr
+        self.pos = pos
 
-
+class VectorIndex(Node):
+    def __init__(self, expr, index_expr, pos):
+        self.expr = expr
+        self.index_expr = index_expr
+        self.pos = pos
       
 class ArgsList(Node):
-  def __init__(self, exprs):
-    self.exprs = exprs
+    def __init__(self, exprs):
+        self.exprs = exprs
 
 class ParametersList(Node):
-  def __init__(self, parameters):
-    self.parameters = parameters
+    def __init__(self, parameters):
+        self.parameters = parameters
+    def __str__(self) -> str:
+       return str(self.parameters)
 
 class Parameter(Node):
-  def __init__(self, type, id):
-    self.type = type
-    self.id = id
+    def __init__(self, type, id):
+        self.type = type
+        self.id = id
+
+
+class TernaryExpr(Node):
+    def __init__(self, cond, first_expr, second_expr, pos):
+        self.cond = cond
+        self.first_expr = first_expr
+        self.second_expr = second_expr
+        self.pos = pos
+
+# class VectorDecl():

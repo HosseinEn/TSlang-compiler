@@ -2,6 +2,9 @@ class Symbol(object):
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return '<{name}>'.format(name=self.name)
+
 class VariableSymbol(Symbol):
 
     def __init__(self, type, name):
@@ -14,6 +17,23 @@ class FunctionSymbol(Symbol):
         super(FunctionSymbol, self).__init__(name)
         self.rettype = rettype
         self.params = params
+    #     self.local_vars = dict()
+
+    # def put_into_local_vars(self, symbol):
+    #     if not symbol.name in self.local_vars:
+    #         self.local_vars[symbol.name] = symbol
+    #         return True
+    #     return False
+    
+    # def get_from_local_vars(self, name):
+    #     symbol = self.local_vars.get(name)
+    #     if symbol is not None:
+    #         return symbol
+    #     return symbol
+
+    def __str__(self):
+        return '<{name} : {rettype}({params})>'.format(name=self.name, rettype=self.rettype, params=self.params)
+    
 
 class SymbolTable(object):
 
@@ -41,4 +61,8 @@ class SymbolTable(object):
 
     def getParent(self):
         return self.parent
+    
+    def print_symbols(self):
+        for key in self.table:
+            print(key, self.table[key])
 

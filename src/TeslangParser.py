@@ -80,6 +80,7 @@ class TeslangParser(object):
                 | block                  
                 | func'''
         p[0] = p[1]
+
     
     def p_single_if(self, p: yacc.YaccProduction):
         '''single_if : IF LPAREN expr RPAREN stmt'''
@@ -102,6 +103,7 @@ class TeslangParser(object):
 
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
+        # TODO why not Body()?
         p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
@@ -135,6 +137,7 @@ class TeslangParser(object):
                  | expr
                  | expr COMMA clist'''
         # TODO check this out after defining functionCall
+        # this is same as expr list
         if len(p) == 2:
             p[0] = ArgsList(exprs=[p[1]])
         elif len(p) == 4:
@@ -169,21 +172,45 @@ class TeslangParser(object):
         #         | NUMBER                           
         #         | STRING                                    
         #     '''
-        '''expr : expr LBRACKET expr RBRACKET                
-                | LBRACKET clist RBRACKET                    
-                | expr QUESTIONMARK expr COLON expr                  
+        '''expr : vector_index               
+                | expr_list                   
+                | ternary_expr                
                 | LNOT expr                        
                 | PLUS expr                        
                 | MINUS expr  
                 | binary_expr                     
                 | ID                               
-                | ID EQUALS expr                   
+                | assignment                   
                 | function_call 
                 | NUMBER                           
                 | STRING'''
         # TODO what should be done for vector declaration?
         # TODO check vector out - expr [expr] and [clist]
-        p[0] = p[1]
+        # breakpoint()
+        if len(p) == 4 or len(p) == 3:
+            p[0] = p[2]
+        else:
+            # TODO - potential bug
+            if p.slice[1].type in ('NUMBER', 'STRING', 'ID'):
+                p[0] = p.slice[1]
+            else:
+                p[0] = p[1]
+
+    def p_expr_list(self, p: yacc.YaccProduction):
+        '''expr_list : LBRACKET clist RBRACKET'''
+        p[0] = ExprList(p[2])
+
+    def p_vector_index(self, p: yacc.YaccProduction):
+        '''vector_index : expr LBRACKET expr RBRACKET'''
+        p[0] = VectorIndex(expr=p[1], index_expr=p[3], pos=getPosition(p))
+
+    def p_assignment(self, p: yacc.YaccProduction):
+        '''assignment : ID EQUALS expr'''
+        p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
+        
+    def p_ternary_expr(self, p: yacc.YaccProduction):
+        '''ternary_expr : expr QUESTIONMARK expr COLON expr  '''
+        p[0] = TernaryExpr(first_expr=p[1], second_expr=p[3], pos=getPosition(p))
 
     def p_function_call(self, p: yacc.YaccProduction):
         '''function_call : ID LPAREN clist RPAREN'''
@@ -220,25 +247,25 @@ class TeslangParser(object):
             print('Unexpected end of input')
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
 
-    # Set up a logging object
-    import logging
-    logging.basicConfig(
-        level = logging.DEBUG,
-        filename = "parselog.txt",
-        filemode = "w",
-        format = "%(filename)10s:%(lineno)4d:%(message)s"
-    )
-    log = logging.getLogger()
+    # # Set up a logging object
+    # import logging
+    # logging.basicConfig(
+    #     level = logging.DEBUG,
+    #     filename = "parselog.txt",
+    #     filemode = "w",
+    #     format = "%(filename)10s:%(lineno)4d:%(message)s"
+    # )
+    # log = logging.getLogger()
 
-    data = open(sys.argv[1], 'r').read()
-    tParser = TeslangParser()
-    # parser = yacc.yacc(debug=True, debuglog=log)
-    parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
+    # data = open(sys.argv[1] if len(sys.argv) == 2 else '../tests/test_input_file1.txt', 'r').read()
+    # tParser = TeslangParser()
+    # # parser = yacc.yacc(debug=True, debuglog=log)
+    # parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
 
-    ast = parser.parse(data, lexer=tParser.scanner)
+    # ast = parser.parse(data, lexer=tParser.scanner)
 
 
 
