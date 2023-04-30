@@ -111,38 +111,43 @@ class TeslangSemanticChecker(object):
                         expr.accept(table)
 
     def visit_BinExpr(self, node, table):
-        if node.op in ('*', '/', '%', '+', '-'): # , '<', '>', '<=', '>=', '==', '!=', '&&', '||'):
-            if node.left.type == 'NUMBER' and node.right.type == 'NUMBER':
-                pass
-            elif node.left.type == 'ID' or node.right.type == 'ID':
-                leftIsNumber = False if node.left.type != 'NUMBER' else True
-                rightIsNumber = False if node.right.type != 'NUMBER' else True
-                if node.left.type == 'ID':
-                    leftSymbol = table.get(node.left.value)
-                    if leftSymbol is None:
-                        self.handle_error(node.pos, 'Variable \'' + node.left.value + '\' not defined but used in binary expression')
-                    elif leftSymbol.type == 'int':
-                        leftIsNumber = True
-                if node.right.type == 'ID':
-                    rightSymbol = table.get(node.right.value)
-                    if rightSymbol is None:
-                        self.handle_error(node.pos, 'Variable \'' + node.right.value + '\' not defined but used in binary expression')
-                    elif rightSymbol.type == 'int':
-                        rightIsNumber = True
-                if leftIsNumber and rightIsNumber:
-                    pass
-                else:
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')                          
-            else:
-                self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
         leftClassName = node.left.__class__.__name__
         rightClassName = node.right.__class__.__name__
         if leftClassName != 'LexToken' and leftClassName != 'ExprList':
             node.left.accept(table)
         if rightClassName != 'LexToken' and rightClassName != 'ExprList':
-            node.left.right(table)
-         # TODO - what if it's a vector?
-        ##################################### now check the types if it's possible to do the operation #####################################
+            node.right.accept(table)            
+        if leftClassName == 'ExprList' or rightClassName == 'ExprList':
+            self.handle_error(node.pos, 'Vector operations not supported')
+        if leftClassName == 'LexToken' and rightClassName == 'LexToken':
+            if node.op in ('*', '/', '%', '+', '-'): # , '<', '>', '<=', '>=', '==', '!=', '&&', '||'):
+                if node.left.type == 'NUMBER' and node.right.type == 'NUMBER':
+                    pass
+                elif node.left.type == 'ID' or node.right.type == 'ID':
+                    leftIsNumber = False if node.left.type != 'NUMBER' else True
+                    rightIsNumber = False if node.right.type != 'NUMBER' else True
+                    if node.left.type == 'ID':
+                        leftSymbol = table.get(node.left.value)
+                        if leftSymbol is None:
+                            self.handle_error(node.pos, 'Variable \'' + node.left.value + '\' not defined but used in binary expression')
+                        elif leftSymbol.type == 'int':
+                            leftIsNumber = True
+                    if node.right.type == 'ID':
+                        rightSymbol = table.get(node.right.value)
+                        if rightSymbol is None:
+                            self.handle_error(node.pos, 'Variable \'' + node.right.value + '\' not defined but used in binary expression')
+                        elif rightSymbol.type == 'int':
+                            rightIsNumber = True
+                    if leftIsNumber and rightIsNumber:
+                        pass
+                    else:
+                        self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')                          
+                else:
+                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
+            elif node.op in ('<', '>', '<=', '>=', '==', '!='):
+                ################################################# handle this 
+                pass
+
 
     def visit_VariableDecl(self, node, table):
         varSymbol = VariableSymbol(node.id, node.type)
