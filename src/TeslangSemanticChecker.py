@@ -120,59 +120,42 @@ class TeslangSemanticChecker(object):
                         expr.accept(table)
 
     def visit_BinExpr(self, node, table):
+
         leftClassName = node.left.__class__.__name__
-        rightClassName = node.right.__class__.__name__
-        if not self.is_terminal(node.left):
-            node.left.accept(table)
-        if not self.is_terminal(node.right):
-            node.right.accept(table)            
-        if leftClassName == 'ExprList' or rightClassName == 'ExprList':
+        if leftClassName == 'ExprList' or leftClassName == 'ExprList':
             self.handle_error(node.pos, 'Vector operations not supported')
 
-
-        if self.is_terminal(node.left) and self.is_terminal(node.right):
-            if node.op in ('*', '/', '%', '+', '-'):
-                if self.both_exprs_are_numbers(node.left, node.right):
-                    pass
-                elif node.left.type == 'ID' or node.right.type == 'ID':
-                    leftIsNumber = False if node.left.type != 'NUMBER' else True
-                    rightIsNumber = False if node.right.type != 'NUMBER' else True
-                    if node.left.type == 'ID':
-                        leftSymbol = table.get(node.left.value)
-                        if leftSymbol is None:
-                            self.handle_error(node.pos, 'Variable \'' + node.left.value + '\' not defined but used in binary expression')
-                        elif leftSymbol.type == 'int':
-                            leftIsNumber = True
-
-                    if node.right.type == 'ID':
-                        rightSymbol = table.get(node.right.value)
-                        if rightSymbol is None:
-                            self.handle_error(node.pos, 'Variable \'' + node.right.value + '\' not defined but used in binary expression')
-                        elif rightSymbol.type == 'int':
-                            rightIsNumber = True
-
-                    if leftIsNumber and rightIsNumber:
-                        pass
-                    else:
-                        self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
+        if node.op in ('*', '/', '%', '+', '-'):
+            le_ri_nodes = (node.left, node.right)
+            for node_item in le_ri_nodes:
+                if not self.is_terminal(node_item):
+                    node_item.accept(table)
+                    if node_item.__class__.__name__ == 'FunctionCall':
+                        funcSymbol = table.get(node_item.id)
+                        if funcSymbol:
+                            if funcSymbol.rettype != 'int':
+                                self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
+                                                    node_item.id + '\' called in binary expression does not return int')
+                                break
                 else:
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
-            elif node.op in ('<', '>', '<=', '>=', '==', '!='):
-                pass
-        elif node.left.__class__.__name__ == 'FunctionCall':
-            node.left.accept(table)
-            funcSymbol = table.get(node.left.id)
-            if funcSymbol:
-                if funcSymbol.rettype != 'int':
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
-                                        node.left.id + '\' called in binary expression does not return int')
-        elif node.right.__class__.__name__ == 'FunctionCall':
-            node.right.accept(table)
-            funcSymbol = table.get(node.right.id)
-            if funcSymbol:
-                if funcSymbol.rettype != 'int':
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
-                                        node.right.id + '\' called in binary expression does not return int')
+                    if node_item.type == 'NUMBER':
+                        pass
+                    elif node_item.type == 'ID':
+                        left_id_search_res = table.get(node_item.value)
+                        if left_id_search_res is None:
+                            self.handle_error(
+                                node.pos, 'Variable \'' + node_item.value + '\' not defined but used in expression')
+                            break
+                        else:
+                            if left_id_search_res.type != 'int':
+                                self.handle_error(node.pos, 'Variable \'' + node_item.value + '\' used in expression is not of type \'int\'')
+                                break
+                    elif node_item.type == 'STRING':
+                            self.handle_error(node.pos, 'Variable \'' + node_item.value + '\' used in expression is not of type \'int\'')
+
+        elif node.op in ('==', '!=', '<', '>', '<=', '>='):
+            pass
+    
 
 
     def visit_VariableDecl(self, node, table):
@@ -198,7 +181,23 @@ class TeslangSemanticChecker(object):
                                       + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
     
     def visit_Assignment(self, node, table):
-        pass
+        # TODO - duplicated code, must be refactored
+        if self.is_terminal(node.expr):
+            if node.type != cast_var(node.expr.type):
+                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
+                                  + '\' but got \'' + cast_var(node.expr.type) + '\'')
+        elif node.expr.__class__.__name__ == 'ExprList':
+            if node.type != 'vector':
+                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
+                                  + '\' but got \'vector\'')
+        elif node.expr.__class__.__name__ == 'FunctionCall':
+            node.expr.accept(table)
+            funcSymbol = table.get(node.expr.id)
+            if funcSymbol:
+                if funcSymbol.rettype != node.type:
+                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
+                                      + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
+    
 
 
 
