@@ -1,4 +1,5 @@
 from SymbolTable import *
+from ply.lex import LexToken
 from AST import *
 from enum import Enum
 
@@ -22,6 +23,13 @@ class TeslangSemanticChecker(object):
     def __init__(self):
         pass
         # self.ttype = Ttype()
+
+    def is_terminal(self, node):
+        return isinstance(node, LexToken)
+    
+    def both_exprs_are_numbers(self, left, right):
+        return left.type == 'NUMBER' and right.type == 'NUMBER'
+
 
     def handle_error(self, pos, msg):
         print('Line ' + str(pos.line) + ': ' + msg)
@@ -84,7 +92,8 @@ class TeslangSemanticChecker(object):
                     param = funcSymbol.params.parameters[i]
                     # arg.accept(table)
                     # breakpoint()
-                    if expr.__class__.__name__ == 'LexToken':
+                    isinstance
+                    if self.is_terminal(expr):
                         if expr.type == 'ID':
                             arg_id_search_res = table.get(expr.value)
                             if arg_id_search_res is None:
@@ -113,15 +122,17 @@ class TeslangSemanticChecker(object):
     def visit_BinExpr(self, node, table):
         leftClassName = node.left.__class__.__name__
         rightClassName = node.right.__class__.__name__
-        if leftClassName != 'LexToken' and leftClassName != 'ExprList':
+        if not self.is_terminal(node.left):
             node.left.accept(table)
-        if rightClassName != 'LexToken' and rightClassName != 'ExprList':
+        if not self.is_terminal(node.right):
             node.right.accept(table)            
         if leftClassName == 'ExprList' or rightClassName == 'ExprList':
             self.handle_error(node.pos, 'Vector operations not supported')
-        if leftClassName == 'LexToken' and rightClassName == 'LexToken':
-            if node.op in ('*', '/', '%', '+', '-'): # , '<', '>', '<=', '>=', '==', '!=', '&&', '||'):
-                if node.left.type == 'NUMBER' and node.right.type == 'NUMBER':
+
+
+        if self.is_terminal(node.left) and self.is_terminal(node.right):
+            if node.op in ('*', '/', '%', '+', '-'):
+                if self.both_exprs_are_numbers(node.left, node.right):
                     pass
                 elif node.left.type == 'ID' or node.right.type == 'ID':
                     leftIsNumber = False if node.left.type != 'NUMBER' else True
@@ -132,21 +143,36 @@ class TeslangSemanticChecker(object):
                             self.handle_error(node.pos, 'Variable \'' + node.left.value + '\' not defined but used in binary expression')
                         elif leftSymbol.type == 'int':
                             leftIsNumber = True
+
                     if node.right.type == 'ID':
                         rightSymbol = table.get(node.right.value)
                         if rightSymbol is None:
                             self.handle_error(node.pos, 'Variable \'' + node.right.value + '\' not defined but used in binary expression')
                         elif rightSymbol.type == 'int':
                             rightIsNumber = True
+
                     if leftIsNumber and rightIsNumber:
                         pass
                     else:
-                        self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')                          
+                        self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
                 else:
                     self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers')
             elif node.op in ('<', '>', '<=', '>=', '==', '!='):
-                ################################################# handle this 
                 pass
+        elif node.left.__class__.__name__ == 'FunctionCall':
+            node.left.accept(table)
+            funcSymbol = table.get(node.left.id)
+            if funcSymbol:
+                if funcSymbol.rettype != 'int':
+                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
+                                        node.left.id + '\' called in binary expression does not return int')
+        elif node.right.__class__.__name__ == 'FunctionCall':
+            node.right.accept(table)
+            funcSymbol = table.get(node.right.id)
+            if funcSymbol:
+                if funcSymbol.rettype != 'int':
+                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
+                                        node.right.id + '\' called in binary expression does not return int')
 
 
     def visit_VariableDecl(self, node, table):
@@ -155,7 +181,7 @@ class TeslangSemanticChecker(object):
         if not table.put(varSymbol):
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' already defined')
 
-        if node.expr.__class__.__name__ == 'LexToken':
+        if self.is_terminal(node.expr):
             if node.type != cast_var(node.expr.type):
                 self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
                                   + '\' but got \'' + cast_var(node.expr.type) + '\'')
