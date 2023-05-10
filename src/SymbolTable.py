@@ -48,11 +48,11 @@ class SymbolTable(object):
             return True
         return False
 
-    def get(self, name):
+    def get(self, name, current_scope=False):
         symbol = self.table.get(name)
         if symbol is not None:
             return symbol
-        elif self.getParent() is not None:
+        elif not current_scope and self.getParent() is not None:
             return self.getParent().get(name)
         return symbol
 

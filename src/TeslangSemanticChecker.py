@@ -92,7 +92,7 @@ class TeslangSemanticChecker(object):
                     param = funcSymbol.params.parameters[i]
                     # arg.accept(table)
                     # breakpoint()
-                    isinstance
+                    # TODO - these codes can be refactored with cast_var()
                     if self.is_terminal(expr):
                         if expr.type == 'ID':
                             arg_id_search_res = table.get(expr.value)
@@ -159,8 +159,7 @@ class TeslangSemanticChecker(object):
 
 
     def visit_VariableDecl(self, node, table):
-        varSymbol = VariableSymbol(node.id, node.type)
-
+        varSymbol = VariableSymbol(node.type, node.id)
         if not table.put(varSymbol):
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' already defined')
 
@@ -181,23 +180,27 @@ class TeslangSemanticChecker(object):
                                       + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
     
     def visit_Assignment(self, node, table):
-        # TODO - duplicated code, must be refactored
-        if self.is_terminal(node.expr):
-            if node.type != cast_var(node.expr.type):
-                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                  + '\' but got \'' + cast_var(node.expr.type) + '\'')
-        elif node.expr.__class__.__name__ == 'ExprList':
-            if node.type != 'vector':
-                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                  + '\' but got \'vector\'')
-        elif node.expr.__class__.__name__ == 'FunctionCall':
-            node.expr.accept(table)
-            funcSymbol = table.get(node.expr.id)
-            if funcSymbol:
-                if funcSymbol.rettype != node.type:
-                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                      + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
-    
+        # TODO - duplicated code, must be refactored and table get method should have a scope
+        node_declaration = table.get(node.id, current_scope=True)
+        if node_declaration is None:
+            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but assigned')
+        else:
+            if self.is_terminal(node.expr):
+                if node_declaration.type != cast_var(node.expr.type):
+                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node_declaration.type 
+                                    + '\' but got \'' + cast_var(node.expr.type) + '\'')
+            elif node.expr.__class__.__name__ == 'ExprList':
+                if node_declaration.type != 'vector':
+                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node_declaration.type 
+                                    + '\' but got \'vector\'')
+            elif node.expr.__class__.__name__ == 'FunctionCall':
+                node.expr.accept(table)
+                funcSymbol = table.get(node.expr.id)
+                if funcSymbol:
+                    if funcSymbol.rettype != node.type:
+                        self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
+                                        + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
+        
 
 
 
@@ -205,12 +208,6 @@ class TeslangSemanticChecker(object):
 
 
     def visit_ExprList(self, node, table):
-        pass
-
-    def visit_FunctionDefList(self, node, table):
-        pass
-
-    def visit_Statement(self, node, table):
         pass
 
     def visit_ReturnInstruction(self, node, table):
@@ -227,9 +224,6 @@ class TeslangSemanticChecker(object):
     
     # def visit_CompoundInstructions(self, node, table):
         # pass
-
-    def visit_Assignment(self, node, table):
-        pass
 
     def visit_VectorIndex(self, node, table):
         pass
