@@ -107,7 +107,8 @@ class TeslangParser(object):
         p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
-        '''return_instr : RETURN expr SEMI'''
+        '''return_instr : RETURN expr'''
+        # breakpoint()
         p[0] = ReturnInstruction(expr=p[2], pos=getPosition(p))
 
     # Rule 5

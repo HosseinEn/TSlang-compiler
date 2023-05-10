@@ -68,6 +68,8 @@ class TeslangSemanticChecker(object):
         # meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
 
         if node.statement:
+            # breakpoint
+            print(node.statement)
             node.statement.accept(table)
         if node.body:
             node.body.accept(table)
@@ -200,15 +202,10 @@ class TeslangSemanticChecker(object):
                     if funcSymbol.rettype != node.type:
                         self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
                                         + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
-        
 
+    def visit_Statement(self, node, table):
+        breakpoint()
 
-
-
-
-
-    def visit_ExprList(self, node, table):
-        pass
 
     def visit_ReturnInstruction(self, node, table):
         pass
