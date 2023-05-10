@@ -224,12 +224,6 @@ class TeslangSemanticChecker(object):
 
     def visit_ForInstruction(self, node, table):
         pass
-
-    def visit_ContinueInstruction(self, node, table):
-        pass    
-    
-    def visit_BreakInstruction(self, node, table):
-        pass    
     
     # def visit_CompoundInstructions(self, node, table):
         # pass
