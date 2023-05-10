@@ -140,7 +140,8 @@ class TeslangParser(object):
         # TODO check this out after defining functionCall
         # this is same as expr list
         if len(p) == 2:
-            p[0] = ArgsList(exprs=[p[1]])
+            exprs = [] if p[1] == [] else [p[1]]
+            p[0] = ArgsList(exprs=exprs)
         elif len(p) == 4:
             p[0] = ArgsList(exprs=p[3].exprs + [p[1]])
 

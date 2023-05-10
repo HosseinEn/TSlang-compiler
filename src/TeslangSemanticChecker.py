@@ -29,6 +29,41 @@ class TeslangSemanticChecker(object):
     
     def both_exprs_are_numbers(self, left, right):
         return left.type == 'NUMBER' and right.type == 'NUMBER'
+    
+
+    def type_checker(self, node, table, type_of_check):
+        expected_type = None
+        if type_of_check == 'variable_declaration':
+            if self.is_terminal(node.expr):
+                expected_type = node.type
+            elif node.expr.__class__.__name__ == 'ExprList':
+                expected_type = 'vector'
+            elif node.expr.__class__.__name__ == 'FunctionCall':
+                node.expr.accept(table)
+                funcSymbol = table.get(node.expr.id)
+                if funcSymbol:
+                    expected_type = funcSymbol.rettype    
+        elif type_of_check == 'assignment':
+            expected_type = table.get(node.id, current_scope=True).type
+        elif type_of_check == 'return_type':
+            expected_type = table.function.rettype
+            
+        if self.is_terminal(node.expr): 
+            if expected_type != cast_var(node.expr.type):
+                self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
+                                + '\' but got \'' + cast_var(node.expr.type) + '\'')
+        elif node.expr.__class__.__name__ == 'ExprList':
+            if expected_type != 'vector':
+                self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
+                                + '\' but got \'vector\'')
+        elif node.expr.__class__.__name__ == 'FunctionCall':
+            node.expr.accept(table)
+            funcSymbol = table.get(node.expr.id)
+            if funcSymbol:
+                if funcSymbol.rettype != expected_type:
+                    self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
+                                    + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
+
 
 
     def handle_error(self, pos, msg):
@@ -64,12 +99,7 @@ class TeslangSemanticChecker(object):
         node.body.accept(child_table)
 
     def visit_Body(self, node, table):
-        # className = node.statement.__class__.__name__
-        # meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
-
         if node.statement:
-            # breakpoint
-            print(node.statement)
             node.statement.accept(table)
         if node.body:
             node.body.accept(table)
@@ -86,7 +116,8 @@ class TeslangSemanticChecker(object):
                               node.id + '\' used as function')
         else:
             funcSymbol = symbol_table_search_res
-            if len(node.args.exprs) != len(funcSymbol.params.parameters):
+            params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
+            if len(node.args.exprs) != params_count:
                 self.handle_error(
                     node.pos, 'Function \'' + node.id + '\' called with wrong number of arguments')
             else:
@@ -165,50 +196,17 @@ class TeslangSemanticChecker(object):
         if not table.put(varSymbol):
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' already defined')
 
-        if self.is_terminal(node.expr):
-            if node.type != cast_var(node.expr.type):
-                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                  + '\' but got \'' + cast_var(node.expr.type) + '\'')
-        elif node.expr.__class__.__name__ == 'ExprList':
-            if node.type != 'vector':
-                self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                  + '\' but got \'vector\'')
-        elif node.expr.__class__.__name__ == 'FunctionCall':
-            node.expr.accept(table)
-            funcSymbol = table.get(node.expr.id)
-            if funcSymbol:
-                if funcSymbol.rettype != node.type:
-                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                      + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
-    
+        if node.expr is not None:
+            self.type_checker(node, table, 'variable_declaration')
+
     def visit_Assignment(self, node, table):
-        # TODO - duplicated code, must be refactored and table get method should have a scope
-        node_declaration = table.get(node.id, current_scope=True)
-        if node_declaration is None:
-            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but assigned')
-        else:
-            if self.is_terminal(node.expr):
-                if node_declaration.type != cast_var(node.expr.type):
-                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node_declaration.type 
-                                    + '\' but got \'' + cast_var(node.expr.type) + '\'')
-            elif node.expr.__class__.__name__ == 'ExprList':
-                if node_declaration.type != 'vector':
-                    self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node_declaration.type 
-                                    + '\' but got \'vector\'')
-            elif node.expr.__class__.__name__ == 'FunctionCall':
-                node.expr.accept(table)
-                funcSymbol = table.get(node.expr.id)
-                if funcSymbol:
-                    if funcSymbol.rettype != node.type:
-                        self.handle_error(node.pos, 'Type mismatch in variable declaration. Expected \'' + node.type 
-                                        + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
-
-    def visit_Statement(self, node, table):
-        breakpoint()
-
+        self.type_checker(node, table, 'assignment')
+     
 
     def visit_ReturnInstruction(self, node, table):
-        pass
+        self.type_checker(node, table, 'return_type')
+
+
 
     def visit_IfOrIfElseInstruction(self, node, table):
         pass
