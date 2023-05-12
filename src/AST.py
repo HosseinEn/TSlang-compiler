@@ -115,9 +115,10 @@ class IfOrIfElseInstruction(Node):
         self.pos = pos
 
 class WhileInstruction(Node):
-    def __init__(self, cond, while_statement):
+    def __init__(self, cond, while_statement, pos):
         self.cond = cond
         self.while_statement = while_statement
+        self.pos = pos
 
 class ForInstruction(Node):
     def __init__(self, start_expr, end_expr, for_statement, pos):
@@ -179,5 +180,9 @@ class TernaryExpr(Node):
         self.first_expr = first_expr
         self.second_expr = second_expr
         self.pos = pos
+
+class Block(Node):
+   def __init__(self, body):
+         self.body = body
 
 # class VectorDecl():

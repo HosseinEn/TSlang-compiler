@@ -104,6 +104,8 @@ class TeslangParser(object):
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
         # TODO why not Body()?
+        # breakpoint()
+        # p[0] = Block(body=p[2])
         p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
@@ -212,7 +214,7 @@ class TeslangParser(object):
         
     def p_ternary_expr(self, p: yacc.YaccProduction):
         '''ternary_expr : expr QUESTIONMARK expr COLON expr  '''
-        p[0] = TernaryExpr(first_expr=p[1], second_expr=p[3], pos=getPosition(p))
+        p[0] = TernaryExpr(cond=p[1], first_expr=p[3], second_expr=p[5], pos=getPosition(p))
 
     def p_function_call(self, p: yacc.YaccProduction):
         '''function_call : ID LPAREN clist RPAREN'''

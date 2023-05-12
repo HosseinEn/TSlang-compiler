@@ -200,7 +200,10 @@ class TeslangSemanticChecker(object):
             self.type_checker(node, table, 'variable_declaration')
 
     def visit_Assignment(self, node, table):
-        self.type_checker(node, table, 'assignment')
+        if table.get(node.id, current_scope=True) is None:
+            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment')
+        else:
+            self.type_checker(node, table, 'assignment')
      
 
     def visit_ReturnInstruction(self, node, table):
@@ -209,18 +212,79 @@ class TeslangSemanticChecker(object):
 
 
     def visit_IfOrIfElseInstruction(self, node, table):
-        pass
+        def is_if_with_else():
+            return node.else_statement is not None
+
+        if node.cond.__class__.__name__ in ('Assignment'):
+            self.handle_error(node.pos, 'Invalid condition type in if statement')
+        if hasattr(node.cond, 'accept'):
+            node.cond.accept(table)
+        node.if_statement.accept(table)
+        if is_if_with_else():
+            node.else_statement.accept(table)
+
+
+    # def visit_Statement(self, node, table):
+    #     pass
+
+    # TODO handling block declarations
+    # def visit_Block(self, node, table):
+    #     child_table = SymbolTable(parent=table, function=None)
+    #     if hasattr(node.body, 'accept'):
+    #         node.body.accept(child_table)
 
     def visit_WhileInstruction(self, node, table):
-        pass
+        if hasattr(node.cond, 'accept'):
+            node.cond.accept(table)
+        # breakpoint()
+        if hasattr(node.while_statement, 'accept'):
+            node.while_statement.accept(table)
 
     def visit_ForInstruction(self, node, table):
-        pass
+        def check_exprs_as_for_range(expr):
+            expr_class_name = expr.__class__.__name__
+            is_assignment = expr_class_name == 'Assignment'
+            is_vector = expr_class_name == 'ExprList'
+            is_identifier_a_number = True
+            is_return_type_a_number = True
+
+            if expr_class_name == 'LexToken':
+                if expr.type == 'STRING':
+                    is_identifier_a_number = False
+                elif expr.type == 'ID':
+                    decl_iden = table.get(expr.value, current_scope=True)
+                    if decl_iden:
+                        is_return_type_a_number = decl_iden.type == 'int'
+                    else:
+                        self.handle_error(node.pos, 'Variable \'' + expr.value + '\' not defined but used in for loop range')
+            
+            if expr_class_name == 'FunctionCall':
+                funcSymbol = table.get(expr.id)
+                if funcSymbol:
+                    is_return_type_a_number = funcSymbol.rettype == 'int'
+
+            if is_assignment:
+                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use assignment as range')
+            elif is_vector:
+                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use vector as range')
+            elif not is_identifier_a_number:
+                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use string as range')
+            elif not is_return_type_a_number:
+                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use function call that returns string as range')
+        
+        check_exprs_as_for_range(node.start_expr)
+        check_exprs_as_for_range(node.end_expr)
+        if hasattr(node.start_expr, 'accept'):
+            node.start_expr.accept(table)
+        if hasattr(node.end_expr, 'accept'):
+            node.end_expr.accept(table)
+        
+            
+        
     
-    # def visit_CompoundInstructions(self, node, table):
-        # pass
 
     def visit_VectorIndex(self, node, table):
+        # breakpoint()
         pass
         
     def visit_ArgsList(self, node, table):
@@ -230,7 +294,7 @@ class TeslangSemanticChecker(object):
         pass
 
     def visit_Parameter(self, node, table):
-            pass
+        pass
 
     def visit_TernaryExpr(self, node, table):
         pass
