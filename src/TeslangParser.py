@@ -105,8 +105,8 @@ class TeslangParser(object):
         '''block : LBRACE body RBRACE'''
         # TODO why not Body()?
         # breakpoint()
-        # p[0] = Block(body=p[2])
-        p[0] = p[2]
+        p[0] = Block(body=p[2])
+        # p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
         '''return_instr : RETURN expr'''

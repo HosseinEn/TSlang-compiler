@@ -227,11 +227,11 @@ class TeslangSemanticChecker(object):
     # def visit_Statement(self, node, table):
     #     pass
 
-    # TODO handling block declarations
-    # def visit_Block(self, node, table):
-    #     child_table = SymbolTable(parent=table, function=None)
-    #     if hasattr(node.body, 'accept'):
-    #         node.body.accept(child_table)
+
+    def visit_Block(self, node, table):
+        child_table = SymbolTable(parent=table, function=None)
+        if hasattr(node.body, 'accept'):
+            node.body.accept(child_table)
 
     def visit_WhileInstruction(self, node, table):
         if hasattr(node.cond, 'accept'):
