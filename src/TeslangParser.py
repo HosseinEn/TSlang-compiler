@@ -30,12 +30,11 @@ class TeslangParser(object):
         ('left', 'EQ', 'NE', 'GT', 'LT', 'GE', 'LE'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'MODULO'),
-        ('left', 'LBRACKET'),
-        ('left', 'LPAREN'),
+        ('right', 'UMINUS'),
         ('left', 'QUESTIONMARK', 'COLON'),
-        ('left', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
+        ('left', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
         ('left', 'COMMA'),
-        ('right', 'LNOT', 'NOT', 'INCREMENT', 'DECREMENT'),
+        ('right', 'EQUALS', 'LNOT', 'NOT', 'INCREMENT', 'DECREMENT'), # EQUALS: =, EQ: ==
     )
 
     # Rule 1
@@ -147,7 +146,7 @@ class TeslangParser(object):
                 | ternary_expr                
                 | LNOT expr                        
                 | PLUS expr                        
-                | MINUS expr  
+                | MINUS expr %prec UMINUS
                 | binary_expr                     
                 | ID                               
                 | assignment                   
