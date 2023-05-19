@@ -3,15 +3,6 @@ from ply.lex import LexToken
 from AST import *
 from enum import Enum
 
-# class VarType(Enum):
-#     NUMBER = 'int'
-#     STRING = 'str'
-
-#     def cast_var(self, var):
-#         if var == VarType.NUMBER:
-#             return 'int'
-#         elif var == VarType.STRING:
-#             return 'str'
 
 def cast_var(var):
     if var == 'NUMBER':

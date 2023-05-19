@@ -61,15 +61,6 @@ class TeslangParser(object):
 
     # Rule 4
     def p_stmt(self, p: yacc.YaccProduction):    
-        # '''stmt : expr SEMI                                
-        #         | defvar SEMI                              
-        #         | IF LPAREN expr RPAREN stmt               
-        #         | IF LPAREN expr RPAREN stmt ELSE stmt     
-        #         | WHILE LPAREN expr RPAREN stmt            
-        #         | FOR LPAREN ID EQUALS expr TO expr RPAREN stmt
-        #         | RETURN expr SEMI                         
-        #         | LBRACE body RBRACE                   
-        #         | func'''
         '''stmt : expr SEMI                                
                 | defvar SEMI
                 | return_instr SEMI
@@ -151,31 +142,6 @@ class TeslangParser(object):
 
     # Rule 9
     def p_expr(self, p: yacc.YaccProduction):    
-        # '''expr : expr LBRACKET expr RBRACKET                
-        #         | LBRACKET clist RBRACKET                    
-        #         | expr QUESTIONMARK expr COLON expr
-        #         | expr PLUS expr                   
-        #         | expr MINUS expr                  
-        #         | expr TIMES expr                  
-        #         | expr DIVIDE expr                 
-        #         | expr MODULO expr                 
-        #         | expr GT expr                     
-        #         | expr LT expr                     
-        #         | expr EQ expr                     
-        #         | expr LE expr                     
-        #         | expr GE expr                     
-        #         | expr NE expr                     
-        #         | expr LOR expr                    
-        #         | expr LAND expr                   
-        #         | LNOT expr                        
-        #         | PLUS expr                        
-        #         | MINUS expr                       
-        #         | ID                               
-        #         | ID EQUALS expr                   
-        #         | ID LPAREN clist RPAREN  
-        #         | NUMBER                           
-        #         | STRING                                    
-        #     '''
         '''expr : vector_index               
                 | expr_list                   
                 | ternary_expr                
@@ -249,28 +215,6 @@ class TeslangParser(object):
             print(f'Syntax error at line {p.lineno} with token {p}')
         else:
             print('Unexpected end of input')
-
-
-# if __name__ == "__main__":
-
-
-    # # Set up a logging object
-    # import logging
-    # logging.basicConfig(
-    #     level = logging.DEBUG,
-    #     filename = "parselog.txt",
-    #     filemode = "w",
-    #     format = "%(filename)10s:%(lineno)4d:%(message)s"
-    # )
-    # log = logging.getLogger()
-
-    # data = open(sys.argv[1] if len(sys.argv) == 2 else '../tests/test_input_file1.txt', 'r').read()
-    # tParser = TeslangParser()
-    # # parser = yacc.yacc(debug=True, debuglog=log)
-    # parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
-
-    # ast = parser.parse(data, lexer=tParser.scanner)
-
 
 
 
