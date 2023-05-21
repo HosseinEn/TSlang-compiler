@@ -18,6 +18,7 @@ class TeslangSemanticChecker(object):
     def is_terminal(self, node):
         return isinstance(node, LexToken)
     
+    
     def both_exprs_are_numbers(self, left, right):
         return left.type == 'NUMBER' and right.type == 'NUMBER'
     
@@ -31,9 +32,11 @@ class TeslangSemanticChecker(object):
                 expected_type = 'vector'
             elif node.expr.__class__.__name__ == 'FunctionCall':
                 node.expr.accept(table)
-                funcSymbol = table.get(node.expr.id)
-                if funcSymbol:
-                    expected_type = funcSymbol.rettype    
+                sym = table.get(node.expr.id)
+                if sym.__class__.__name__ == 'FunctionSymbol':
+                    expected_type = funcSymbol.rettype  
+                elif sym.__class__.__name__ == 'VariableSymbol':
+                    self.handle_error(node.pos, f'Variable {sym} used as function')   
         elif type_of_check == 'assignment':
             expected_type = table.get(node.id, current_scope=True).type
         elif type_of_check == 'return_type':
@@ -49,11 +52,14 @@ class TeslangSemanticChecker(object):
                                 + '\' but got \'vector\'')
         elif node.expr.__class__.__name__ == 'FunctionCall':
             node.expr.accept(table)
-            funcSymbol = table.get(node.expr.id)
-            if funcSymbol:
-                if funcSymbol.rettype != expected_type:
+            sym = table.get(node.expr.id)
+            if sym != None and sym.__class__.__name__ == 'FunctionSymbol':
+                if sym.rettype != expected_type:
                     self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
-                                    + '\' but function \'' + node.expr.id + '\' returns \'' + funcSymbol.rettype + '\'')
+                                    + '\' but function \'' + node.expr.id + '\' returns \'' + sym.rettype + '\'')
+
+            elif sym.__class__.__name__ == 'VariableSymbol':
+                self.handle_error(node.pos, f'Variable {sym} used as function')
 
 
 
@@ -155,12 +161,14 @@ class TeslangSemanticChecker(object):
                 if not self.is_terminal(node_item):
                     node_item.accept(table)
                     if node_item.__class__.__name__ == 'FunctionCall':
-                        funcSymbol = table.get(node_item.id)
-                        if funcSymbol:
-                            if funcSymbol.rettype != 'int':
+                        sym = table.get(node_item.id)
+                        if sym != None and sym.__class__.__name__ == 'FunctionSymbol':
+                            if sym.rettype != 'int':
                                 self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
                                                     node_item.id + '\' called in binary expression does not return int')
                                 break
+                        elif sym.__class__.__name__ == 'VariableSymbol':
+                            self.handle_error(node.pos, f'Variable {sym} used as function')
                 else:
                     if node_item.type == 'NUMBER':
                         pass
