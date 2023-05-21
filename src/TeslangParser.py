@@ -141,7 +141,7 @@ class TeslangParser(object):
 
     # Rule 9
     def p_expr(self, p: yacc.YaccProduction):    
-        '''expr : vector_index               
+        '''expr : operation_on_list               
                 | expr_list                   
                 | ternary_expr                
                 | LNOT expr                        
@@ -169,13 +169,20 @@ class TeslangParser(object):
         '''expr_list : LBRACKET clist RBRACKET'''
         p[0] = ExprList(p[2])
 
-    def p_vector_index(self, p: yacc.YaccProduction):
-        '''vector_index : expr LBRACKET expr RBRACKET'''
-        p[0] = VectorIndex(expr=p[1], index_expr=p[3], pos=getPosition(p))
+    def p_operation_on_list(self, p: yacc.YaccProduction):
+        '''operation_on_list : expr LBRACKET expr RBRACKET
+                             | ID LBRACKET expr RBRACKET'''
+        # breakpoint()
+        p[0] = OperationOnList(expr=p[1], index_expr=p[3], pos=getPosition(p))
 
     def p_assignment(self, p: yacc.YaccProduction):
-        '''assignment : ID EQUALS expr'''
-        p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
+        '''assignment : ID EQUALS expr
+                      | ID LBRACKET expr RBRACKET EQUALS expr'''
+        # breakpoint()
+        if len(p) == 4:
+            p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
+        else:
+            p[0] = VectorAssignment(id=p[1], index_expr=p[3], expr=p[6], pos=getPosition(p))
         
     def p_ternary_expr(self, p: yacc.YaccProduction):
         '''ternary_expr : expr QUESTIONMARK expr COLON expr  '''

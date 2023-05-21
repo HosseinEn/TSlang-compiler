@@ -146,13 +146,23 @@ class Body(Node):
         self.statement = statement
         self.body = body
 
+
 class Assignment(Node):
     def __init__(self, id, expr, pos):
         self.id = id
         self.expr = expr
         self.pos = pos
 
-class VectorIndex(Node):
+class VectorAssignment(Node):
+    def __init__(self, id, index_expr, expr, pos):
+        self.id = id
+        self.index_expr = index_expr
+        self.expr = expr
+        self.pos = pos
+       
+
+
+class OperationOnList(Node):
     def __init__(self, expr, index_expr, pos):
         self.expr = expr
         self.index_expr = index_expr

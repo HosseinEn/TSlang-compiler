@@ -195,6 +195,12 @@ class TeslangSemanticChecker(object):
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment')
         else:
             self.type_checker(node, table, 'assignment')
+
+    def visit_VectorAssignment(self, node, table):
+        if table.get(node.id, current_scope=True) is None:
+            self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment')
+        # else:
+        #     self.type_checker(node, table, 'assignment')
      
 
     def visit_ReturnInstruction(self, node, table):
@@ -248,11 +254,12 @@ class TeslangSemanticChecker(object):
                         is_return_type_a_number = decl_iden.type == 'int'
                     else:
                         self.handle_error(node.pos, 'Variable \'' + expr.value + '\' not defined but used in for loop range')
-            
             if expr_class_name == 'FunctionCall':
-                funcSymbol = table.get(expr.id)
-                if funcSymbol:
-                    is_return_type_a_number = funcSymbol.rettype == 'int'
+                sym = table.get(expr.id)
+                if sym.__class__.__name__ == 'FunctionSymbol':
+                    is_return_type_a_number = sym.rettype == 'int'
+                elif sym.__class__.__name__ == 'VariableSymbol':
+                    self.handle_error(node.pos, f'Variable {sym} used as function')
 
             if is_assignment:
                 self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use assignment as range')
@@ -274,7 +281,8 @@ class TeslangSemanticChecker(object):
         
     
 
-    def visit_VectorIndex(self, node, table):
+    def visit_OperationOnList(self, node, table):
+        # check that the expr operated on list is the correct type
         # breakpoint()
         pass
         
