@@ -5,67 +5,66 @@ from enum import Enum
 from colors import bcolors
 
 
-def cast_var(var):
-    if var == 'NUMBER':
-        return 'int'
-    elif var == 'STRING':
-        return 'str'        
+class ExprNotFound(Exception):
+    pass
+
+      
 
 class TeslangSemanticChecker(object):
     cast_var = {
         'NUMBER' : 'int',
         'STRING' : 'str',
     }
+    
     def __init__(self):
         pass
-        # self.ttype = Ttype()
-
+  
     def is_terminal(self, node):
         return isinstance(node, LexToken)
     
     
     def both_exprs_are_numbers(self, left, right):
         return left.type == 'NUMBER' and right.type == 'NUMBER'
-    
 
-    def type_checker(self, node, table, type_of_check):
-        expected_type = None
-        if type_of_check == 'variable_declaration':
-            if self.is_terminal(node.expr):
-                expected_type = node.type
-            elif node.expr.__class__.__name__ == 'ExprList':
-                expected_type = 'vector'
-            elif node.expr.__class__.__name__ == 'FunctionCall':
-                node.expr.accept(table)
-                sym = table.get(node.expr.id)
-                if sym.__class__.__name__ == 'FunctionSymbol':
-                    expected_type = sym.rettype  
-                elif sym.__class__.__name__ == 'VariableSymbol':
-                    self.handle_error(node.pos, f'Variable {sym} used as function')   
-        elif type_of_check == 'assignment':
-            expected_type = table.get(node.id, current_scope=True).type
-        elif type_of_check == 'return_type':
-            expected_type = table.function.rettype
-            
-        if self.is_terminal(node.expr): 
-            if expected_type != cast_var(node.expr.type):
-                self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
-                                + '\' but got \'' + cast_var(node.expr.type) + '\'')
-        elif node.expr.__class__.__name__ == 'ExprList':
-            if expected_type != 'vector':
-                self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
-                                + '\' but got \'vector\'')
-        elif node.expr.__class__.__name__ == 'FunctionCall':
-            node.expr.accept(table)
-            sym = table.get(node.expr.id)
-            if sym != None and sym.__class__.__name__ == 'FunctionSymbol':
-                if sym.rettype != expected_type:
-                    self.handle_error(node.pos, f'Type mismatch in {type_of_check}. Expected \'' + expected_type
-                                    + '\' but function \'' + node.expr.id + '\' returns \'' + sym.rettype + '\'')
 
-            elif sym.__class__.__name__ == 'VariableSymbol':
-                self.handle_error(node.pos, f'Variable {sym} used as function')
-
+    def extract_expr_type(self, expr, table):
+        expr_class_name = expr.__class__.__name__
+        if expr_class_name == 'LexToken':
+            if expr.type == 'ID':
+                id_search_res = table.get(expr.value)
+                if id_search_res:
+                    return id_search_res.type
+                else:
+                    file_pos_simulation_obj = type('obj', (object,), {'line' : expr.lineno})
+                    self.handle_error(file_pos_simulation_obj, 'Variable \'' + expr.value + '\' not defined but used in expression')
+                    raise ExprNotFound
+            else:
+                return self.cast_var[expr.type]
+        elif expr_class_name == 'ExprList' or expr_class_name == 'OperationOnList':
+            return 'vector'
+        elif expr_class_name == 'FunctionCall':
+            expr.accept(table)
+            funcSymbol = table.get(expr.id)
+            if funcSymbol:
+                return funcSymbol.rettype
+            else:
+                raise ExprNotFound
+        elif expr_class_name == 'Assignment':
+            expr.accept(table)
+        elif expr_class_name == 'VectorAssignment':
+            expr.accept(table)
+            return 'vector'
+        elif expr_class_name == 'TernaryExpr':
+            pass
+        elif expr_class_name == 'BinExpr':
+            expr.accept(table)
+            try:
+                left_type = self.extract_expr_type(expr.left, table)
+                right_type = self.extract_expr_type(expr.right, table)
+                if left_type == right_type:
+                    return left_type
+            except ExprNotFound:
+                pass
 
 
     def handle_error(self, pos, msg):
@@ -150,47 +149,26 @@ class TeslangSemanticChecker(object):
                         expr.accept(table)
 
     def visit_BinExpr(self, node, table):
+        try: 
+            leftExprType = self.extract_expr_type(node.left, table)
+            rightExprType = self.extract_expr_type(node.right, table)
+            if leftExprType == 'vector' or rightExprType == 'vector':
+                self.handle_error(node.pos, 'Vector operations not supported')
 
-        leftClassName = node.left.__class__.__name__
-        if leftClassName == 'ExprList' or leftClassName == 'ExprList':
-            self.handle_error(node.pos, 'Vector operations not supported')
-
-        if node.op in ('*', '/', '%', '+', '-'):
-            le_ri_nodes = (node.left, node.right)
-            for node_item in le_ri_nodes:
-                if not self.is_terminal(node_item):
-                    node_item.accept(table)
-                    if node_item.__class__.__name__ == 'FunctionCall':
-                        sym = table.get(node_item.id)
-                        if sym != None and sym.__class__.__name__ == 'FunctionSymbol':
-                            if sym.rettype != 'int':
-                                self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, +, - can only be used with numbers. Function \'' + 
-                                                    node_item.id + '\' called in binary expression does not return int')
-                                break
-                        elif sym.__class__.__name__ == 'VariableSymbol':
-                            self.handle_error(node.pos, f'Variable {sym} used as function')
-                else:
-                    if node_item.type == 'NUMBER':
-                        pass
-                    elif node_item.type == 'ID':
-                        left_id_search_res = table.get(node_item.value)
-                        if left_id_search_res is None:
-                            self.handle_error(
-                                node.pos, 'Variable \'' + node_item.value + '\' not defined but used in expression')
-                            break
-                        else:
-                            if left_id_search_res.type != 'int':
-                                self.handle_error(node.pos, 'Variable \'' + node_item.value + '\' used in expression is not of type \'int\'')
-                                break
-                    elif node_item.type == 'STRING':
-                            self.handle_error(node.pos, 'Variable \'' + node_item.value + '\' used in expression is not of type \'int\'')
-
-        elif node.op in ('==', '!=', '<', '>', '<=', '>='):
+            if node.op in ('*', '/', '%', '-'):
+                if leftExprType != 'int' or rightExprType != 'int':
+                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, - can only be used with numbers')
+            elif node.op == '+':
+                if not (leftExprType == 'int' and rightExprType == 'int') or \
+                not (leftExprType == 'str' and rightExprType == 'str'):
+                    self.handle_error(node.pos, 'Type mismatch in binary expression. + can only be used with numbers or strings')
+            else: 
+                pass
+        except ExprNotFound:
             pass
-    
 
-    def extract_expr_type():
-        pass
+ 
+    
 
     def visit_VariableDecl(self, node, table):
         varSymbol = VariableSymbol(node.type, node.id)
@@ -198,24 +176,49 @@ class TeslangSemanticChecker(object):
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' already defined')
 
         if node.expr is not None:
-            self.type_checker(node, table, 'variable_declaration')
+            expected_type = node.type
+            try:
+                given_type = self.extract_expr_type(node.expr, table)
+                if given_type != expected_type:
+                    self.handle_error(node.pos, f'Type mismatch in variable declaration. Expected \'' + expected_type
+                                    + '\' but got \'' + given_type + '\'')
+            except ExprNotFound:
+                pass
+
+
 
     def visit_Assignment(self, node, table):
         if table.get(node.id, current_scope=True) is None:
             self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment')
         else:
-            self.type_checker(node, table, 'assignment')
+            expected_type = table.get(node.id, current_scope=True).type
+            given_type = self.extract_expr_type(node.expr, table)
+            if given_type != expected_type:
+                self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
+                                + '\' but got \'' + given_type + '\'')
 
     def visit_VectorAssignment(self, node, table):
-        if table.get(node.id, current_scope=True) is None:
-            self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment')
-        # else:
-        #     self.type_checker(node, table, 'assignment')
-     
+        try:
+            if self.extract_expr_type(node.index_expr) != 'int':
+                self.handle_error(node.pos, 'Invalid index type in vector assignment. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr) + '\'')
+            if table.get(node.id, current_scope=True) is None:
+                self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment')
+            else:
+                given_type = self.extract_expr_type(node.expr, table)
+                if given_type != 'vector':
+                    self.handle_error(node.pos, 'Invalid expression type in vector assignment. Expected \'vector\' but got \'' + given_type + '\'')
+        except ExprNotFound:
+            pass
 
     def visit_ReturnInstruction(self, node, table):
-        self.type_checker(node, table, 'return_type')
-
+        try:
+            expected_type = table.function.rettype
+            given_return_type = self.extract_expr_type(node.expr, table)
+            if expected_type != given_return_type:
+                self.handle_error(node.pos, f'Type mismatch in return statement. Expected \'' + expected_type
+                                + '\' but got \'' + given_return_type + '\'')
+        except ExprNotFound:
+            pass
 
 
     def visit_IfOrIfElseInstruction(self, node, table):
@@ -230,11 +233,6 @@ class TeslangSemanticChecker(object):
         if is_if_with_else():
             node.else_statement.accept(table)
 
-
-    # def visit_Statement(self, node, table):
-    #     pass
-
-
     def visit_Block(self, node, table):
         child_table = SymbolTable(parent=table, function=None)
         if hasattr(node.body, 'accept'):
@@ -243,53 +241,18 @@ class TeslangSemanticChecker(object):
     def visit_WhileInstruction(self, node, table):
         if hasattr(node.cond, 'accept'):
             node.cond.accept(table)
-        # breakpoint()
         if hasattr(node.while_statement, 'accept'):
             node.while_statement.accept(table)
 
     def visit_ForInstruction(self, node, table):
-        def check_exprs_as_for_range(expr):
-            expr_class_name = expr.__class__.__name__
-            is_assignment = expr_class_name == 'Assignment'
-            is_vector = expr_class_name == 'ExprList'
-            is_identifier_a_number = True
-            is_return_type_a_number = True
+        try:
+            if self.extract_expr_type(node.start_expr, table) != 'int':
+                self.handle_error(node.pos, 'Invalid expression type in for loop start range. Expected \'int\' but got \'' + self.extract_expr_type(node.start_expr, table) + '\'')    
+            elif self.extract_expr_type(node.end_expr, table) != 'int':
+                self.handle_error(node.pos, 'Invalid expression type in for loop end range. Expected \'int\' but got \'' + self.extract_expr_type(node.end_expr, table) + '\'')    
+        except ExprNotFound:
+            pass
 
-            if expr_class_name == 'LexToken':
-                if expr.type == 'STRING':
-                    is_identifier_a_number = False
-                elif expr.type == 'ID':
-                    decl_iden = table.get(expr.value, current_scope=True)
-                    if decl_iden:
-                        is_return_type_a_number = decl_iden.type == 'int'
-                    else:
-                        self.handle_error(node.pos, 'Variable \'' + expr.value + '\' not defined but used in for loop range')
-            if expr_class_name == 'FunctionCall':
-                sym = table.get(expr.id)
-                if sym.__class__.__name__ == 'FunctionSymbol':
-                    is_return_type_a_number = sym.rettype == 'int'
-                elif sym.__class__.__name__ == 'VariableSymbol':
-                    self.handle_error(node.pos, f'Variable {sym} used as function')
-
-            if is_assignment:
-                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use assignment as range')
-            elif is_vector:
-                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use vector as range')
-            elif not is_identifier_a_number:
-                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use string as range')
-            elif not is_return_type_a_number:
-                self.handle_error(node.pos, 'Invalid expression type in for loop range. cannot use function call that returns string as range')
-        
-        check_exprs_as_for_range(node.start_expr)
-        check_exprs_as_for_range(node.end_expr)
-        if hasattr(node.start_expr, 'accept'):
-            node.start_expr.accept(table)
-        if hasattr(node.end_expr, 'accept'):
-            node.end_expr.accept(table)
-        
-            
-        
-    
 
     def visit_OperationOnList(self, node, table):
         # check that the expr operated on list is the correct type
