@@ -2,15 +2,20 @@ from SymbolTable import *
 from ply.lex import LexToken
 from AST import *
 from enum import Enum
+from colors import bcolors
 
 
-def cast_var(var):
-    if var == 'NUMBER':
-        return 'int'
-    elif var == 'STRING':
-        return 'str'
+# def cast_var(var):
+#     if var == 'NUMBER':
+#         return 'int'
+#     elif var == 'STRING':
+#         return 'str'        
 
 class TeslangSemanticChecker(object):
+    cast_var = {
+        'NUMBER' : 'int',
+        'STRING' : 'str',
+    }
     def __init__(self):
         pass
         # self.ttype = Ttype()
@@ -34,7 +39,7 @@ class TeslangSemanticChecker(object):
                 node.expr.accept(table)
                 sym = table.get(node.expr.id)
                 if sym.__class__.__name__ == 'FunctionSymbol':
-                    expected_type = funcSymbol.rettype  
+                    expected_type = sym.rettype  
                 elif sym.__class__.__name__ == 'VariableSymbol':
                     self.handle_error(node.pos, f'Variable {sym} used as function')   
         elif type_of_check == 'assignment':
@@ -64,7 +69,7 @@ class TeslangSemanticChecker(object):
 
 
     def handle_error(self, pos, msg):
-        print('Line ' + str(pos.line) + ': ' + msg)
+        print(bcolors.FAIL + 'Semantic error at line ' + str(pos.line) + bcolors.ENDC + ': ' + msg)
 
     def visit_Program(self, node, table):
         if table is None:
@@ -74,25 +79,19 @@ class TeslangSemanticChecker(object):
         if node.prog:
             node.prog.accept(table)
 
-    def visit_FunctionDef(self, node, parent_table):
+    def visit_FunctionDef(self, node, parent_table: SymbolTable):
+        parent_table.show_unused()
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
-
         if not parent_table.put(funcSymbol):
             self.handle_error(node.pos, 'Function \'' +
                               node.name + '\' already defined')
-        # breakpoint()
-        # table.print_symbols()
-        # print('-----------')
-
         child_table = SymbolTable(parent_table, funcSymbol)
-        # breakpoint()
         if node.fmlparams:
             for param in node.fmlparams.parameters:
                 varSymbol = VariableSymbol(param.type, param.id)
                 if not child_table.put(varSymbol):
                     self.handle_error(
                         node.pos, 'Parameter \'' + param.id + '\' already defined')
-
         node.body.accept(child_table)
 
     def visit_Body(self, node, table):
@@ -100,6 +99,7 @@ class TeslangSemanticChecker(object):
             node.statement.accept(table)
         if node.body:
             node.body.accept(table)
+        table.show_unused()
 
     def visit_FunctionCall(self, node, table):
         # Searching for the called function in the symbol table
@@ -189,6 +189,8 @@ class TeslangSemanticChecker(object):
             pass
     
 
+    def extract_expr_type():
+        pass
 
     def visit_VariableDecl(self, node, table):
         varSymbol = VariableSymbol(node.type, node.id)

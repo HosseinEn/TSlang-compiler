@@ -2,7 +2,9 @@ import ply.yacc as yacc
 import logging
 from TeslangLexer import *
 from AST  import *
-import sys
+from ply.lex import LexToken
+from colors import bcolors
+
 
 
 
@@ -51,6 +53,16 @@ class TeslangParser(object):
         # TODO  - potential bug , How about second rule? I'm just passing the expr as body
         p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
 
+    def p_func_parameter_error(self, p):
+        '''func : DEF TYPE ID LPAREN error RPAREN LBRACE body RBRACE'''
+        p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=None, body=p[8], pos=getPosition(p))
+        self.handle_error('function definition', p[5])
+
+    def p_func_missing_return_type_error(self, p):
+        '''func : DEF error ID LPAREN flist RPAREN LBRACE body RBRACE'''
+        p[0] = FunctionDef(rettype='int', name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
+        self.handle_error('function return type', p[2])
+
     # Rule 3
     def p_body(self, p: yacc.YaccProduction):
         '''body : empty 
@@ -70,6 +82,12 @@ class TeslangParser(object):
                 | block                  
                 | func'''
         p[0] = p[1]
+
+    def p_stmt_error(self, p):
+        '''stmt : error SEMI
+                | error'''
+        self.handle_error('statement', p[1])
+
 
     
     def p_single_if(self, p: yacc.YaccProduction):
@@ -94,13 +112,11 @@ class TeslangParser(object):
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
         # TODO why not Body()?
-        # breakpoint()
         p[0] = Block(body=p[2])
         # p[0] = p[2]
 
     def p_return_instr(self, p: yacc.YaccProduction):
         '''return_instr : RETURN expr'''
-        # breakpoint()
         p[0] = ReturnInstruction(expr=p[2], pos=getPosition(p))
 
     # Rule 5
@@ -155,7 +171,6 @@ class TeslangParser(object):
                 | STRING'''
         # TODO what should be done for vector declaration?
         # TODO check vector out - expr [expr] and [clist]
-        # breakpoint()
         if len(p) == 4 or len(p) == 3:
             p[0] = p[2]
         else:
@@ -172,13 +187,11 @@ class TeslangParser(object):
     def p_operation_on_list(self, p: yacc.YaccProduction):
         '''operation_on_list : expr LBRACKET expr RBRACKET
                              | ID LBRACKET expr RBRACKET'''
-        # breakpoint()
         p[0] = OperationOnList(expr=p[1], index_expr=p[3], pos=getPosition(p))
 
     def p_assignment(self, p: yacc.YaccProduction):
         '''assignment : ID EQUALS expr
                       | ID LBRACKET expr RBRACKET EQUALS expr'''
-        # breakpoint()
         if len(p) == 4:
             p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
         else:
@@ -192,6 +205,10 @@ class TeslangParser(object):
         '''function_call : ID LPAREN clist RPAREN'''
         p[0] = FunctionCall(id=p[1], args=p[3], pos=getPosition(p))
 
+    def p_function_call_error(self, p):
+        '''function_call : ID LPAREN error RPAREN'''
+        self.handle_error('function call', p[3])
+    
 
     def p_binary_expr(self, p: yacc.YaccProduction):
         '''binary_expr : expr PLUS expr                   
@@ -215,10 +232,17 @@ class TeslangParser(object):
         '''empty :'''
         p[0] = []
 
+    def handle_error(self, where, p):
+        print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
+               bcolors.ENDC +  f' in {where} with token {p}')
+        # print(bcolors.FAIL + "Syntax error at line %d, column %d" + bcolors.ENDC + "in %s, at token LexToken(%s, '%s')"
+        #     % \
+        #     (p.lineno, self.scanner.find_token_column(p), where, p.type, p.value))
+
 
     def p_error(self, p):
         if p is not None:
-            print(f'Syntax error at line {p.lineno} with token {p}')
+            print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' + bcolors.ENDC +  f' with token {p}')
         else:
             print('Unexpected end of input')
 
