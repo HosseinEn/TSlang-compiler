@@ -5,11 +5,11 @@ from enum import Enum
 from colors import bcolors
 
 
-# def cast_var(var):
-#     if var == 'NUMBER':
-#         return 'int'
-#     elif var == 'STRING':
-#         return 'str'        
+def cast_var(var):
+    if var == 'NUMBER':
+        return 'int'
+    elif var == 'STRING':
+        return 'str'        
 
 class TeslangSemanticChecker(object):
     cast_var = {
