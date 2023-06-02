@@ -8,7 +8,6 @@ class ExprNotFound(Exception):
     pass
 
       
-
 class TeslangSemanticChecker(object):
     cast_var = {
         'NUMBER' : 'int',
@@ -17,7 +16,6 @@ class TeslangSemanticChecker(object):
     
     def __init__(self):
         pass
-  
     
     def both_exprs_are_numbers(self, left, right):
         return left.type == 'NUMBER' and right.type == 'NUMBER'
@@ -27,7 +25,7 @@ class TeslangSemanticChecker(object):
         expr_class_name = expr.__class__.__name__
         if expr_class_name == 'LexToken':
             if expr.type == 'ID':
-                id_search_res = table.get(expr.value)
+                id_search_res = table.get(expr.value, current_scope=True)
                 if id_search_res:
                     return id_search_res.type
                 else:
@@ -41,7 +39,7 @@ class TeslangSemanticChecker(object):
         elif expr_class_name == 'FunctionCall':
             expr.accept(table)
             funcSymbol = table.get(expr.id)
-            if funcSymbol:
+            if funcSymbol and funcSymbol.__class__.__name__ == 'FunctionSymbol':
                 return funcSymbol.rettype
             else:
                 raise ExprNotFound
@@ -105,23 +103,25 @@ class TeslangSemanticChecker(object):
                               node.id + '\' not defined but called')
 
         elif symbol_table_search_res.__class__.__name__ == 'VariableSymbol':
-            self.handle_error(node.pos, 'Variable \'' +
-                              node.id + '\' used as function')
+            self.handle_error(node.pos, '\'' + node.id + '\' is not a function but used as function')
         else:
             funcSymbol = symbol_table_search_res
             params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
             if len(node.args.exprs) != params_count:
                 self.handle_error(
                     node.pos, 'Function \'' + node.id + '\' called with wrong number of arguments')
-            else:
-                for i, expr in enumerate(node.args.exprs):
+                
+            for i, expr in enumerate(node.args.exprs):
+                try: 
                     param = funcSymbol.params.parameters[i]
                     arg_type = self.extract_expr_type(expr, table)
 
                     if arg_type != param.type:
                         self.handle_error(node.pos, 'Function \'' + node.id + '\' called with wrong type of arguments in ' +
-                                          str(len(node.args.exprs)-i) + '. expected \'' + param.type + '\' but got \'' + arg_type + '\'')
-              
+                                        str(len(node.args.exprs)-i) + '. expected \'' + param.type + '\' but got \'' + arg_type + '\'')
+                except ExprNotFound:
+                    pass
+            
 
     def visit_BinExpr(self, node, table):
         try: 
