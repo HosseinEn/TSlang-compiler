@@ -239,18 +239,8 @@ class TeslangSemanticChecker(object):
         # breakpoint()
         pass
         
-    def visit_ArgsList(self, node, table):
-        pass
-    
-    def visit_ParametersList(self, node, table):
-        pass
-
-    def visit_Parameter(self, node, table):
-        pass
-
     def visit_TernaryExpr(self, node, table):
         pass
 
-    # def visit_VectorDecl():
 
 
