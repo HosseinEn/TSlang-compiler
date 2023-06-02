@@ -18,9 +18,6 @@ class TeslangSemanticChecker(object):
     def __init__(self):
         pass
   
-    def is_terminal(self, node):
-        return isinstance(node, LexToken)
-    
     
     def both_exprs_are_numbers(self, left, right):
         return left.type == 'NUMBER' and right.type == 'NUMBER'
