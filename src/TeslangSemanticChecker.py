@@ -1,7 +1,6 @@
 from SymbolTable import *
 from ply.lex import LexToken
 from AST import *
-from enum import Enum
 from colors import bcolors
 
 

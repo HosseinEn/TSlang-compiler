@@ -235,14 +235,11 @@ class TeslangParser(object):
     def handle_error(self, where, p):
         print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
                bcolors.ENDC +  f' in {where} with token {p}')
-        # print(bcolors.FAIL + "Syntax error at line %d, column %d" + bcolors.ENDC + "in %s, at token LexToken(%s, '%s')"
-        #     % \
-        #     (p.lineno, self.scanner.find_token_column(p), where, p.type, p.value))
-
 
     def p_error(self, p):
         if p is not None:
-            print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' + bcolors.ENDC +  f' with token {p}')
+            # print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' + bcolors.ENDC +  f' with token {p}')
+            pass
         else:
             print('Unexpected end of input')
 
