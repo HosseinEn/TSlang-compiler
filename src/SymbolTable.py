@@ -58,7 +58,7 @@ class SymbolTable(object):
         for key in self.table:
             print(key, self.table[key])
 
-    def show_unused(self):
+    def show_unused_warning(self):
         for key in self.table:
             if not self.table[key].used:
                 symbolType = 'variable' if isinstance(self.table[key], VariableSymbol) else 'function'
@@ -69,6 +69,5 @@ class SymbolTable(object):
                 else:
                     position = ''
                 print(bcolors.WARNING + f'WARNING - Unused {symbolType} \'{self.table[key].name}\'' + position + bcolors.ENDC)
-                self.table[key].used = True
 
 

@@ -19,4 +19,6 @@ parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
 
 ast = parser.parse(data, lexer=tParser.scanner)
 
-ast.accept()
+table = ast.accept()
+table.show_unused_warning()
+# breakpoint()
