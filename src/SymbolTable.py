@@ -60,7 +60,7 @@ class SymbolTable(object):
 
     def show_unused_warning(self):
         for key in self.table:
-            if not self.table[key].used:
+            if not self.table[key].used and self.table[key].name != 'main':
                 symbolType = 'variable' if isinstance(self.table[key], VariableSymbol) else 'function'
                 if isinstance(self.table[key], VariableSymbol) and self.function:
                     position = ' at function \'' + self.function.name + '\''
