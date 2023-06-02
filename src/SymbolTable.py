@@ -62,10 +62,8 @@ class SymbolTable(object):
         for key in self.table:
             if not self.table[key].used:
                 symbolType = 'variable' if isinstance(self.table[key], VariableSymbol) else 'function'
-                if isinstance(self.table[key], VariableSymbol) and self.parent.function:
-                    position = ' in function \'' + self.parent.function.name + '\''
-                elif isinstance(self.table[key], VariableSymbol) and self.function:
-                    position = ' at function \'' + self.function.name + '\' parameter list'
+                if isinstance(self.table[key], VariableSymbol) and self.function:
+                    position = ' at function \'' + self.function.name + '\''
                 else:
                     position = ''
                 print(bcolors.WARNING + f'WARNING - Unused {symbolType} \'{self.table[key].name}\'' + position + bcolors.ENDC)
