@@ -21,4 +21,4 @@ ast = parser.parse(data, lexer=tParser.scanner)
 
 table = ast.accept()
 table.show_unused_warning()
-# breakpoint()
+breakpoint()

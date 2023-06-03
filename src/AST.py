@@ -3,10 +3,7 @@ from TeslangSemanticChecker import TeslangSemanticChecker
 class Node(object):
 
     def __init__(self, node_info):
-        #if len(node_info) == 3:
         self.lineno = node_info['lno']
-            #self.columnno = node_info['cno']
-            #self.ptype = node_info['ptype']
         
     def accept(self, table = None):
         className = self.__class__.__name__
@@ -75,10 +72,6 @@ class FunctionDef(Node):
     self.body = body
     self.pos = pos
 
-# class InstructionList(Node):
-#   def __init__(self, instrs):
-#     self.instrs = instrs
-
 class Statement(Node):
     def __init__(self, statement):
       self.statement = statement
@@ -88,24 +81,6 @@ class ReturnInstruction(Node):
     self.expr = expr
     self.pos = pos
 
-# class DeclarationList(Node):
-#   def __init__(self, decls):
-#     self.decls = decls
-
-# class Declaration(Node):
-#   def __init__(self, type, inits, pos):
-#     self.type = type
-#     self.inits = inits
-#     self.pos = pos
-
-# class InitList(Node):
-#   def __init__(self, inits):
-#     self.inits = inits
-
-# class Init(Node):
-#   def __init__(self, id, expr):
-#     self.id = id
-#     self.expr = expr
 
 class IfOrIfElseInstruction(Node):
     def __init__(self, cond, if_statement, pos, else_statement = None):
@@ -136,10 +111,6 @@ class BreakInstruction(Node):
     def __init__(self):
         pass
 
-# class CompoundInstructions(Node):
-#   def __init__(self, decls, instrs):
-#     self.decls = decls
-#     self.instrs = instrs
 
 class Body(Node):
     def __init__(self, statement, body):
@@ -194,5 +165,3 @@ class TernaryExpr(Node):
 class Block(Node):
    def __init__(self, body):
          self.body = body
-
-# class VectorDecl():

@@ -209,9 +209,11 @@ class TeslangSemanticChecker(object):
             self.handle_error(node.pos, 'Invalid condition type in if statement')
         if hasattr(node.cond, 'accept'):
             node.cond.accept(table)
-        node.if_statement.accept(table)
+        if hasattr(node.if_statement, 'accept'):
+            node.if_statement.accept(table)
         if is_if_with_else():
-            node.else_statement.accept(table)
+            if hasattr(node.else_statement, 'accept'):
+                node.else_statement.accept(table)
 
     def visit_Block(self, node, table):
         child_table = SymbolTable(parent=table, function=None)
@@ -236,7 +238,6 @@ class TeslangSemanticChecker(object):
 
     def visit_OperationOnList(self, node, table):
         # check that the expr operated on list is the correct type
-        # breakpoint()
         pass
         
     def visit_TernaryExpr(self, node, table):
