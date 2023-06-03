@@ -25,12 +25,13 @@ class TeslangSemanticChecker(object):
         expr_class_name = expr.__class__.__name__
         if expr_class_name == 'LexToken':
             if expr.type == 'ID':
-                id_search_res = table.get(expr.value, current_scope=True)
+                id_search_res = table.get(expr.value)
                 if id_search_res:
                     return id_search_res.type
                 else:
                     file_pos_simulation_obj = type('obj', (object,), {'line' : expr.lineno})
-                    self.handle_error(file_pos_simulation_obj, 'Variable \'' + expr.value + '\' not defined but used in expression')
+                    self.handle_error(file_pos_simulation_obj, 'Variable \'' + expr.value +
+                                       '\' not defined but used in expression in function \'' + table.function.name + '\'')
                     raise ExprNotFound
             else:
                 return self.cast_var[expr.type]
@@ -163,12 +164,14 @@ class TeslangSemanticChecker(object):
 
 
 
-    def visit_Assignment(self, node, table):
-        if table.get(node.id, current_scope=True) is None:
-            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment')
+    def visit_Assignment(self, node, table: SymbolTable):
+        symbol = table.get(node.id)
+        if symbol is None:
+            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment in function \'' 
+                              + table.function.name + '\'')
         else:
             try:
-                expected_type = table.get(node.id, current_scope=True).type
+                expected_type = symbol.type
                 given_type = self.extract_expr_type(node.expr, table)
                 if given_type != expected_type:
                     self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
@@ -182,10 +185,12 @@ class TeslangSemanticChecker(object):
                 self.handle_error(node.pos, 'Invalid index type in vector assignment. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr) + '\'')
             
             # TODO - bug, because when we are using a vector which declared out of block, we can't find it in the table in the current scope
-            if table.get(node.id, current_scope=True) is None:
-                self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment')
+            symbol = table.get(node.id)
+            if symbol is None:
+                self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment in function \'' +
+                                   table.function.name +'\'')
             else:
-                id_type = table.get(node.id, current_scope=True).type
+                id_type = symbol.type
                 if id_type != 'vector':
                     self.handle_error(node.pos, 'Invalid expression type in vector assignment. Expected \'' + node.id + '\' to be \'vector\' but got \'' + id_type + '\'')
         except ExprNotFound:
