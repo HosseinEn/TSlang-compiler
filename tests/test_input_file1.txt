@@ -1,3 +1,37 @@
+def int find(vector A, int n) {
+    var int k;
+    var float j;
+
+    for (i = 0 to 5) {
+        if (n == k) {
+            return j;
+        }
+        j = j + 1;
+    }   
+
+    return -1;
+}
+
+def null print(int x) {
+
+}
+
+def int main() {
+    var int A;
+    var int a;
+
+    A = list(3);
+    A[0] = 1;
+    A[1] = 2;
+    A[2] = 3;
+
+    print(find(A, a));
+    print(find(A));
+    print(find(a, A));
+
+    return A;
+}
+
 # def str something1() {
 #     var vector hel = 'ijoo';
 #     com(-2*com(), first_arg, [second_arg, 1]);
@@ -161,26 +195,26 @@
 #     return max_val;
 # }
 
-def str is_prime(int n) {
-    if (n <= 1) {
-        return 0;
-    }
-    for (var int i = 2; i <= n/2; i = i + 1) {
-        if (n % i == 0) {
-            return 0;
-        }
-    }
-    return 1;
-}
+# def str is_prime(int n) {
+#     if (n <= 1) {
+#         return 0;
+#     }
+#     for (var int i = 2; i <= n/2; i = i + 1) {
+#         if (n % i == 0) {
+#             return 0;
+#         }
+#     }
+#     return 1;
+# }
 
 
-def str reverse(int s) {
-    var str rev = "";
-    for (var int i = 6 - 1; i >= 0; i = i - 1) {
-        rev = rev + s[is_prime('jj')];
-    }
-    return rev;
-}
+# def str reverse(int s) {
+#     var str rev = "";
+#     for (var int i = 6 - 1; i >= 0; i = i - 1) {
+#         rev = rev + s[is_prime('jj')];
+#     }
+#     return rev;
+# }
 
 
 

@@ -113,7 +113,8 @@ class TeslangSemanticChecker(object):
             params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
             if len(node.args.exprs) != params_count:
                 self.handle_error(
-                    node.pos, 'Function \'' + node.id + '\' called with wrong number of arguments')
+                    node.pos, 'Function \'' + node.id + '\' called with wrong number of arguments. Expected ' + 
+                    str(params_count) + ' but got ' + str(len(node.args.exprs)) + '.')
                 
             for i, expr in enumerate(node.args.exprs):
                 try: 
