@@ -111,9 +111,8 @@ class TeslangParser(object):
 
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
-        # TODO why not Body()?
         p[0] = Block(body=p[2])
-        # p[0] = p[2]
+
 
     def p_return_instr(self, p: yacc.YaccProduction):
         '''return_instr : RETURN expr'''
@@ -179,6 +178,10 @@ class TeslangParser(object):
                 p[0] = p.slice[1]
             else:
                 p[0] = p[1]
+
+    def p_expr_error(self, p):
+        '''expr : error'''
+        self.handle_error('expression', p[1])
 
     def p_expr_list(self, p: yacc.YaccProduction):
         '''expr_list : LBRACKET clist RBRACKET'''

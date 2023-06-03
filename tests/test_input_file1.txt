@@ -103,6 +103,12 @@ int main (void) {
 def int main() {
     #var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
 }
+
+
+
+
+
+
 def int sum(vector numList) {
     var int result = 0;
     for (i = 0 to length(numList)) {
@@ -111,12 +117,14 @@ def int sum(vector numList) {
     # returning the result.
     return result;
 }
+
 def str concatenate(int lengthOfString) {
     int i = 0;
     var vector b = [1, 2, 3, 4];
-    while (i++ < lengthOfString) {
-        print(x)
-    }
+    print(x);
+    # while (i < lengthOfString) {
+    #     print(x);
+    # }
 }
 
 # recursive combination function
@@ -128,7 +136,7 @@ def void combination(int n, int r, int index, vector data, int i) {
             print(data[j]);
         }
         print("jjjj");
-        return;
+        return ;
     }
     var str x = "hello";
     # When no more elements are there to put in data[]

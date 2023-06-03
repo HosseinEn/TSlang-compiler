@@ -59,6 +59,7 @@ class TeslangSemanticChecker(object):
                     return left_type
             except ExprNotFound:
                 pass
+        return 'unknown'
 
 
     def handle_error(self, pos, msg):
@@ -216,7 +217,7 @@ class TeslangSemanticChecker(object):
                 node.else_statement.accept(table)
 
     def visit_Block(self, node, table):
-        child_table = SymbolTable(parent=table, function=None)
+        child_table = SymbolTable(parent=table, function=table.function)
         if hasattr(node.body, 'accept'):
             node.body.accept(child_table)
 
