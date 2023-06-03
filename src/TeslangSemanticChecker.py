@@ -35,7 +35,7 @@ class TeslangSemanticChecker(object):
                     raise ExprNotFound
             else:
                 return self.cast_var[expr.type]
-        elif expr_class_name == 'ExprList' or expr_class_name == 'OperationOnList':
+        elif expr_class_name == 'ExprList':
             return 'vector'
         elif expr_class_name == 'FunctionCall':
             expr.accept(table)
@@ -60,6 +60,8 @@ class TeslangSemanticChecker(object):
                     return left_type
             except ExprNotFound:
                 pass
+        elif expr_class_name == 'OperationOnList':
+            expr.accept(table)
         return 'unknown'
 
 
@@ -243,9 +245,17 @@ class TeslangSemanticChecker(object):
 
 
     def visit_OperationOnList(self, node, table):
-        # check that the expr operated on list is the correct type
-        pass
-        
+        symbol = table.get(node.expr)
+        if symbol is None:
+            self.handle_error(node.pos, 'Vector \'' + node.expr + '\' not defined but used in operation in function \'' +
+                               table.function.name +'\'')
+        else:
+            id_type = symbol.type
+            if id_type != 'vector':
+                self.handle_error(node.pos, 'Identifier \'' +
+                                 node.expr + '\' expected to be \'vector\' but got \'' + id_type + '\'')
+            if self.extract_expr_type(node.index_expr, table) != 'int':
+                self.handle_error(node.pos, 'Invalid index type for \'' + symbol.name + '\'. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr, table) + '\'')        
     def visit_TernaryExpr(self, node, table):
         pass
 
