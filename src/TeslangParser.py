@@ -148,9 +148,9 @@ class TeslangParser(object):
         # this is same as expr list
         if len(p) == 2:
             exprs = [] if p[1] == [] else [p[1]]
-            p[0] = ArgsList(exprs=exprs)
+            p[0] = ExprList(exprs=exprs)
         elif len(p) == 4:
-            p[0] = ArgsList(exprs=p[3].exprs + [p[1]])
+            p[0] = ExprList(exprs=p[3].exprs + [p[1]])
 
         
 
@@ -171,6 +171,8 @@ class TeslangParser(object):
         # TODO what should be done for vector declaration?
         # TODO check vector out - expr [expr] and [clist]
         if len(p) == 4 or len(p) == 3:
+            if p[1] == '-':
+                p[2].value = -p[2].value
             p[0] = p[2]
         else:
             # TODO - potential bug
@@ -185,7 +187,7 @@ class TeslangParser(object):
 
     def p_expr_list(self, p: yacc.YaccProduction):
         '''expr_list : LBRACKET clist RBRACKET'''
-        p[0] = ExprList(p[2])
+        p[0] = p[2]
 
     def p_operation_on_list(self, p: yacc.YaccProduction):
         '''operation_on_list : expr LBRACKET expr RBRACKET

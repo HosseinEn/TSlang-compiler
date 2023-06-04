@@ -103,8 +103,11 @@ class TeslangSemanticChecker(object):
         # Searching for the called function in the symbol table
         symbol_table_search_res = table.get(node.id)
         if symbol_table_search_res is None:
-            self.handle_error(node.pos, 'Function \'' +
-                              node.id + '\' not defined but called')
+            if node.id in ('print', 'length', 'list'):
+                print("Ignoring built-ins for now", bcolors.OKBLUE, node.id, bcolors.ENDC)
+            else:
+                self.handle_error(node.pos, 'Function \'' +
+                                node.id + '\' not defined but called')
 
         elif symbol_table_search_res.__class__.__name__ == 'VariableSymbol':
             self.handle_error(node.pos, '\'' + node.id + '\' is not a function but used as function')
@@ -151,19 +154,38 @@ class TeslangSemanticChecker(object):
     
 
     def visit_VariableDecl(self, node, table):
-        varSymbol = VariableSymbol(node.type, node.id)
+        varSymbol = None
+        if node.type == 'vector':
+            rightSideExprType = self.extract_expr_type(node.expr, table)
+            if rightSideExprType != 'vector':
+                self.handle_error(node.pos, 'Type mismatch in vector declaration. Expected \'vector\' but got \''
+                                   + rightSideExprType + '\'')
+                # Handling error by passing vector length as zero to show more errors
+                varSymbol = VectorSymbol(node.id, 0)
+            else:
+                exprsListNode = node.expr
+                varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+        elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+            # breakpoint()
+            varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)
+        else:
+            varSymbol = VariableSymbol(node.type, node.id)
+
         if not table.put(varSymbol):
-            self.handle_error(node.pos, 'Variable \'' + node.id + '\' already defined')
+            self.handle_error(node.pos, 'Symbol \'' + node.id + '\' of type \''
+                               + node.type + '\' already defined')
 
         if node.expr is not None:
-            expected_type = node.type
-            try:
-                given_type = self.extract_expr_type(node.expr, table)
-                if given_type != expected_type:
-                    self.handle_error(node.pos, f'Type mismatch in variable declaration. Expected \'' + expected_type
-                                    + '\' but got \'' + given_type + '\'')
-            except ExprNotFound:
-                pass
+            if node.type != 'vector':
+                expected_type = node.type
+                try:
+                    given_type = self.extract_expr_type(node.expr, table)
+                    if given_type != expected_type:
+                        self.handle_error(node.pos, f'Type mismatch in variable declaration. Expected \'' + expected_type
+                                        + '\' but got \'' + given_type + '\'')
+                except ExprNotFound:
+                    pass
+                
 
 
 
@@ -174,28 +196,46 @@ class TeslangSemanticChecker(object):
                               + table.function.name + '\'')
         else:
             try:
-                expected_type = symbol.type
-                given_type = self.extract_expr_type(node.expr, table)
-                if given_type != expected_type:
-                    self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
-                                    + '\' but got \'' + given_type + '\'')
+                if isinstance(symbol, VariableSymbol):
+                    expected_type = symbol.type
+                    given_type = self.extract_expr_type(node.expr, table)
+                    if given_type != expected_type:
+                        self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
+                                        + '\' but got \'' + given_type + '\'')
+                elif isinstance(symbol, VectorSymbol):
+                    # breakpoint()
+                    if node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                        symbol.length = node.expr.args.exprs[0].value
+                else:
+                    self.handle_error(node.pos, 'Can not use ' 
+                                      + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in assignment')
             except ExprNotFound:
                 pass
 
     def visit_VectorAssignment(self, node, table):
         try:
-            if self.extract_expr_type(node.index_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid index type in vector assignment. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr) + '\'')
+            index_type = self.extract_expr_type(node.index_expr, table)
+            if index_type != 'int':
+                self.handle_error(node.pos, 'Invalid index type in vector assignment. Expected \'int\' but got \'' + index_type + '\'')
             
-            # TODO - bug, because when we are using a vector which declared out of block, we can't find it in the table in the current scope
             symbol = table.get(node.id)
             if symbol is None:
                 self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment in function \'' +
                                    table.function.name +'\'')
             else:
-                id_type = symbol.type
-                if id_type != 'vector':
-                    self.handle_error(node.pos, 'Invalid expression type in vector assignment. Expected \'' + node.id + '\' to be \'vector\' but got \'' + id_type + '\'')
+                if not isinstance(symbol, VectorSymbol):
+                    self.handle_error(node.pos, 'Can not use ' 
+                        + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  
+
+                else:
+                    # breakpoint()
+                    if symbol.length <= node.index_expr.value or node.index_expr.value < 0:
+                        self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
+                                          + node.id + '\' can hold only ' + str(symbol.length) + ' values')
+                    rightSideExprType = self.extract_expr_type(node.expr, table)
+                    if rightSideExprType != 'int':
+                        self.handle_error(node.pos, 'Invalid expression type in vector assignment. Vector can hold only \'int\' values but got \''
+                                           + rightSideExprType + '\'' + ' in function \'' + table.function.name + '\'')
         except ExprNotFound:
             pass
 

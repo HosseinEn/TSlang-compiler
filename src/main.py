@@ -12,7 +12,7 @@ logging.basicConfig(
 )
 log = logging.getLogger()
 
-data = open(sys.argv[1] if len(sys.argv) == 2 else '../tests/test_input_file2.txt', 'r').read()
+data = open(('../tests/' +sys.argv[1]) if len(sys.argv) == 2 else '../tests/input3.txt', 'r').read()
 tParser = TeslangParser()
 # parser = yacc.yacc(debug=True, debuglog=log)
 parser = yacc.yacc(module=tParser, debug=True, write_tables=True)

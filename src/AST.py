@@ -138,10 +138,6 @@ class OperationOnList(Node):
         self.expr = expr
         self.index_expr = index_expr
         self.pos = pos
-      
-class ArgsList(Node):
-    def __init__(self, exprs):
-        self.exprs = exprs
 
 class ParametersList(Node):
     def __init__(self, parameters):
