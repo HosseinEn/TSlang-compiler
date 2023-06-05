@@ -109,8 +109,9 @@ class TeslangSemanticChecker(object):
                 self.handle_error(node.pos, 'Function \'' +
                                 node.id + '\' not defined but called')
 
-        elif symbol_table_search_res.__class__.__name__ == 'VariableSymbol':
-            self.handle_error(node.pos, '\'' + node.id + '\' is not a function but used as function')
+        elif not isinstance(symbol_table_search_res, FunctionSymbol):
+            self.handle_error(node.pos, '\'' + node.id + '\' is not a function but called as function in \'' +
+                               table.function.name + '\'')
         else:
             funcSymbol = symbol_table_search_res
             params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
