@@ -44,46 +44,5 @@ class PreParser(object):
         if node.body:
             node.body.accept(table, pre_parse=True)
 
-    def visit_FunctionCall(self, node, table):
-        pass
-            
-
-    def visit_BinExpr(self, node, table):
-        pass
- 
-    
-
-    def visit_VariableDecl(self, node, table):
-        pass
-
-
-    def visit_Assignment(self, node, table: SymbolTable):
-        pass
-
-    def visit_VectorAssignment(self, node, table):
-        pass
-
-    def visit_ReturnInstruction(self, node, table):
-        pass
-
-
-    def visit_IfOrIfElseInstruction(self, node, table):
-        pass
-
-    def visit_Block(self, node, table):
-        pass
-
-    def visit_WhileInstruction(self, node, table):
-        pass
-
-    def visit_ForInstruction(self, node, table):
-        pass
-
-    def visit_OperationOnList(self, node, table):
-        pass
-
-    def visit_TernaryExpr(self, node, table):
-        pass
-
 
 
