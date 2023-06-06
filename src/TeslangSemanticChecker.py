@@ -79,8 +79,9 @@ class TeslangSemanticChecker(object):
     def visit_FunctionDef(self, node, parent_table: SymbolTable):
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
-            self.handle_error(node.pos, 'Function \'' +
-                              node.name + '\' already defined')
+            if parent_table.get(node.name).redefined:
+                self.handle_error(node.pos, 'Function \'' +
+                                node.name + '\' already defined')
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             for param in node.fmlparams.parameters:

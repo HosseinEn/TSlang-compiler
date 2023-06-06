@@ -4,6 +4,21 @@ import sys
 import ply.yacc as yacc
 
 
+
+def up_and_run_compiler():
+    def start(pre_parse, table=None):
+        tParser = TeslangParser(pre_parse=pre_parse)
+        parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
+        ast = parser.parse(data, lexer=tParser.scanner)
+        table = ast.accept(pre_parse=pre_parse, table=table if not pre_parse else None)
+        if not pre_parse:
+            table.show_unused_warning() 
+        return table
+    table = start(pre_parse=True)
+    start(pre_parse=False, table=table)
+
+
+
 logging.basicConfig(
     level = logging.DEBUG,
     filename = "parselog.txt",
@@ -12,13 +27,7 @@ logging.basicConfig(
 )
 log = logging.getLogger()
 
-data = open(('../tests/' +sys.argv[1]) if len(sys.argv) == 2 else '../tests/input3.txt', 'r').read()
-tParser = TeslangParser()
-# parser = yacc.yacc(debug=True, debuglog=log)
-parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
+data = open(('../tests/' +sys.argv[1]) if len(sys.argv) == 2 else '../tests/input1.txt', 'r').read()
 
-ast = parser.parse(data, lexer=tParser.scanner)
+up_and_run_compiler()
 
-table = ast.accept()
-table.show_unused_warning()
-# breakpoint()

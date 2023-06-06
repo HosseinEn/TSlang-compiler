@@ -18,7 +18,8 @@ def getPosition(p):
 
 
 class TeslangParser(object):
-    def __init__(self):
+    def __init__(self, pre_parse=False):
+        self.pre_parse = pre_parse
         self.scanner = TeslangLexer()
         self.scanner.build()
     
@@ -238,12 +239,12 @@ class TeslangParser(object):
         p[0] = []
 
     def handle_error(self, where, p):
-        print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
-               bcolors.ENDC +  f' in {where} with token {p}')
+        if not self.pre_parse:
+            print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
+                bcolors.ENDC +  f' in {where} with token {p}')
 
     def p_error(self, p):
         if p is not None:
-            # print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' + bcolors.ENDC +  f' with token {p}')
             pass
         else:
             print('Unexpected end of input')

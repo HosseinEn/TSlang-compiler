@@ -20,7 +20,7 @@ class VectorSymbol(Symbol):
         self.length = length
 
 class FunctionSymbol(Symbol):
-
+    redefined = False
     def __init__(self, rettype, name, params):
         super(FunctionSymbol, self).__init__(name)
         self.rettype = rettype
@@ -43,6 +43,9 @@ class SymbolTable(object):
             self.table[symbol.name] = symbol
             return True
         return False
+    
+    def mark_as_defined(self, key):
+        self.table[key].redefined = True
 
     def get(self, name, current_scope=False):
         symbol = self.table.get(name)

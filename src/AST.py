@@ -1,13 +1,17 @@
 from TeslangSemanticChecker import TeslangSemanticChecker
+from preParser import PreParser
 
 class Node(object):
 
     def __init__(self, node_info):
         self.lineno = node_info['lno']
         
-    def accept(self, table = None):
+    def accept(self, table = None, pre_parse=False):
         className = self.__class__.__name__
-        meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
+        if pre_parse:
+            meth = getattr(PreParser(), 'visit_' + className, None)
+        else:
+            meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
         if meth!=None:
             return meth(self, table)
 
