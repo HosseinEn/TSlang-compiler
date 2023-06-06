@@ -18,6 +18,7 @@ class VectorSymbol(Symbol):
     def __init__(self, name, length):
         super(VectorSymbol, self).__init__(name)
         self.length = length
+        self.type = 'vector'
 
 class FunctionSymbol(Symbol):
     redefined = False

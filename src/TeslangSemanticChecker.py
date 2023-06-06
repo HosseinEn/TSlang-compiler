@@ -158,17 +158,22 @@ class TeslangSemanticChecker(object):
     def visit_VariableDecl(self, node, table):
         varSymbol = None
         if node.type == 'vector':
-            rightSideExprType = self.extract_expr_type(node.expr, table)
-            if rightSideExprType != 'vector':
-                self.handle_error(node.pos, 'Type mismatch in vector declaration. Expected \'vector\' but got \''
-                                   + rightSideExprType + '\'')
-                # Handling error by passing vector length as zero to show more errors
-                varSymbol = VectorSymbol(node.id, 0)
-            else:
-                exprsListNode = node.expr
-                varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+            try:
+                rightSideExprType = self.extract_expr_type(node.expr, table)
+                if rightSideExprType != 'vector':
+                    self.handle_error(node.pos, 'Type mismatch in vector declaration. Expected \'vector\' but got \''
+                                    + rightSideExprType + '\'')
+                    # Handling error by passing vector length as zero to show more errors
+                    varSymbol = VectorSymbol(node.id, 0)
+                else:
+                    exprsListNode = node.expr
+                    varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+            except ExprNotFound:
+                breakpoint()
+                pass
         elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
-            # breakpoint()
+            # TODO - handle list function
+            # if not self.handle_list_function_error(node, table):
             varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)
         else:
             varSymbol = VariableSymbol(node.type, node.id)
@@ -188,8 +193,17 @@ class TeslangSemanticChecker(object):
                 except ExprNotFound:
                     pass
                 
-
-
+    # def handle_list_function_error(self, node, table):
+    #     # if len(node.expr.args) != 1:
+    #     #     self.handle_error(node.pos, 'Function \'list\' called with wrong number of arguments. Expected 1 but got ' 
+    #     #                       + str(len(node.expr.args)) + '.')
+    #     #     return True
+    #     # elif self.extract_expr_type(node.exprs.args.exprs[0], table) != 'int':
+    #     #     self.handle_error(node.pos, 'Function \'list\' called with wrong type of arguments. Expected \'int\' but got \'' 
+    #     #                       + self.extract_expr_type(node.exprs.args.exprs[0], table) + '\'')
+    #     #     return True
+    #     # else:
+    #     return False
 
     def visit_Assignment(self, node, table: SymbolTable):
         symbol = table.get(node.id)
@@ -205,9 +219,11 @@ class TeslangSemanticChecker(object):
                         self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
                                         + '\' but got \'' + given_type + '\'')
                 elif isinstance(symbol, VectorSymbol):
-                    # breakpoint()
-                    if node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
-                        symbol.length = node.expr.args.exprs[0].value
+                    # TODO
+                    pass
+                    # if node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                    #     if not self.handle_list_function_error(node, table):
+                    #         symbol.length = node.expr.args.exprs[0].value
                 else:
                     self.handle_error(node.pos, 'Can not use ' 
                                       + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in assignment')
@@ -280,9 +296,11 @@ class TeslangSemanticChecker(object):
     def visit_ForInstruction(self, node, table):
         try:
             if self.extract_expr_type(node.start_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid expression type in for loop start range. Expected \'int\' but got \'' + self.extract_expr_type(node.start_expr, table) + '\'')    
+                self.handle_error(node.pos, 'Invalid expression type in for loop start range. Expected \'int\' but got \'' 
+                                  + self.extract_expr_type(node.start_expr, table) + '\'')    
             elif self.extract_expr_type(node.end_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid expression type in for loop end range. Expected \'int\' but got \'' + self.extract_expr_type(node.end_expr, table) + '\'')    
+                self.handle_error(node.pos, 'Invalid expression type in for loop end range. Expected \'int\' but got \'' 
+                                  + self.extract_expr_type(node.end_expr, table) + '\'')    
         except ExprNotFound:
             pass
 
@@ -297,8 +315,12 @@ class TeslangSemanticChecker(object):
             if id_type != 'vector':
                 self.handle_error(node.pos, 'Identifier \'' +
                                  node.expr + '\' expected to be \'vector\' but got \'' + id_type + '\'')
-            if self.extract_expr_type(node.index_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid index type for \'' + symbol.name + '\'. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr, table) + '\'')        
+            try:
+                if self.extract_expr_type(node.index_expr, table) != 'int':
+                    self.handle_error(node.pos, 'Invalid index type for \'' + symbol.name + '\'. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr, table) + '\'')        
+            except ExprNotFound:
+                pass
+
     def visit_TernaryExpr(self, node, table):
         pass
 

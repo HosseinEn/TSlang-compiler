@@ -4,10 +4,14 @@ def int main() {
         print("hello");
         return 'sojid';
     }
-    var int A;
+    # var int A;
+    # A = list();
     var int a;
 
-    A = list(3);
+    # var vector A = list(5);
+    var vector A = [1,2,3,4];
+
+
     A[0] = 1;
     A[1] = "diofj";
     A[2] = 3;
