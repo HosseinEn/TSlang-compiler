@@ -88,9 +88,31 @@ class TeslangSemanticChecker(object):
                 varSymbol = VariableSymbol(param.type, param.id)
                 if not child_table.put(varSymbol):
                     self.handle_error(
-                        node.pos, 'Parameter \'' + param.id + '\' already defined')
+                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
         if node.body:
             node.body.accept(child_table)
+        child_table.show_unused_warning()
+
+    def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
+        funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
+        if not parent_table.put(funcSymbol):
+            if parent_table.get(node.name).redefined:
+                self.handle_error(node.pos, 'Function \'' +
+                                node.name + '\' already defined')
+        child_table = SymbolTable(parent_table, funcSymbol)
+        if node.fmlparams:
+            for param in node.fmlparams.parameters:
+                varSymbol = VariableSymbol(param.type, param.id)
+                if not child_table.put(varSymbol):
+                    self.handle_error(
+                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+        try:
+            expr_type = self.extract_expr_type(node.expr, child_table)
+            if expr_type != funcSymbol.rettype:
+                self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
+                                  + '\' but got \'' + expr_type + '\'')
+        except ExprNotFound:
+            pass
         child_table.show_unused_warning()
 
     def visit_Body(self, node, table):

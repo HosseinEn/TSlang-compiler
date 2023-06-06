@@ -51,8 +51,10 @@ class TeslangParser(object):
     def p_func(self, p: yacc.YaccProduction):
         '''func : DEF TYPE ID LPAREN flist RPAREN LBRACE body RBRACE
                 | DEF TYPE ID LPAREN flist RPAREN RETURN expr SEMI'''
-        # TODO  - potential bug , How about second rule? I'm just passing the expr as body
-        p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
+        if isinstance(p[8], Body):
+            p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
+        else:
+            p[0] = BodyLessFunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], expr=p[8], pos=getPosition(p))
 
     def p_func_parameter_error(self, p):
         '''func : DEF TYPE ID LPAREN error RPAREN LBRACE body RBRACE'''

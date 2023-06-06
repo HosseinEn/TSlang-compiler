@@ -76,6 +76,14 @@ class FunctionDef(Node):
     self.body = body
     self.pos = pos
 
+class BodyLessFunctionDef(Node):
+  def __init__(self, rettype, name, fmlparams, expr, pos):
+    self.rettype = rettype
+    self.name = name
+    self.fmlparams = fmlparams
+    self.expr = expr
+    self.pos = pos
+
 class Statement(Node):
     def __init__(self, statement):
       self.statement = statement

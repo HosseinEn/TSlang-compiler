@@ -24,6 +24,8 @@ def int main() {
     return A;
 }
 
+def int test(str aaa) return 122;
+
 def int find(vector A, int n) {
     var int k;
     var float j;
