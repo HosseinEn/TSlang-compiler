@@ -130,12 +130,8 @@ class TeslangSemanticChecker(object):
         # Searching for the called function in the symbol table
         symbol_table_search_res = table.get(node.id)
         if symbol_table_search_res is None:
-            if node.id in ('print', 'length', 'list'):
-                print("Ignoring built-ins for now", bcolors.OKBLUE, node.id, bcolors.ENDC)
-            else:
-                self.handle_error(node.pos, 'Function \'' +
-                                node.id + '\' not defined but called')
-
+            self.handle_error(node.pos, 'Function \'' +
+                            node.id + '\' not defined but called')
         elif not isinstance(symbol_table_search_res, FunctionSymbol):
             self.handle_error(node.pos, '\'' + node.id + '\' is not a function but called as function in \'' +
                                table.function.name + '\'')
@@ -146,17 +142,17 @@ class TeslangSemanticChecker(object):
                 self.handle_error(
                     node.pos, 'Function \'' + node.id + '\' called with wrong number of arguments. Expected ' + 
                     str(params_count) + ' but got ' + str(len(node.args.exprs)) + '.')
-                
-            for i, expr in enumerate(node.args.exprs):
-                try: 
-                    param = funcSymbol.params.parameters[i]
-                    arg_type = self.extract_expr_type(expr, table)
+            else:
+                for i, expr in enumerate(node.args.exprs):
+                    try: 
+                        param = funcSymbol.params.parameters[i]
+                        arg_type = self.extract_expr_type(expr, table)
 
-                    if arg_type != param.type:
-                        self.handle_error(node.pos, 'Function \'' + node.id + '\' called with wrong type of arguments in ' +
-                                        str(len(node.args.exprs)-i) + '. expected \'' + param.type + '\' but got \'' + arg_type + '\'')
-                except ExprNotFound:
-                    pass
+                        if arg_type != param.type:
+                            self.handle_error(node.pos, 'Function \'' + node.id + '\' called with wrong type of arguments in ' +
+                                            str(len(node.args.exprs)-i) + '. expected \'' + param.type + '\' but got \'' + arg_type + '\'')
+                    except ExprNotFound:
+                        pass
             
 
     def visit_BinExpr(self, node, table):
@@ -192,14 +188,14 @@ class TeslangSemanticChecker(object):
                     # Handling error by passing vector length as zero to show more errors
                     varSymbol = VectorSymbol(node.id, 0)
                 else:
-                    exprsListNode = node.expr
-                    varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+                    if node.expr.__class__.__name__ == 'ExprList':
+                        exprsListNode = node.expr
+                        varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+                    elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                        node.expr.accept(table)
+                        varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)                        
             except ExprNotFound:
                 pass
-        elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
-            # TODO - handle list function
-            # if not self.handle_list_function_error(node, table):
-            varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)
         else:
             varSymbol = VariableSymbol(node.type, node.id, False)
 
@@ -208,8 +204,8 @@ class TeslangSemanticChecker(object):
                                + node.type + '\' already defined')
 
         if node.expr is not None:
-            varSymbol.assigned = True
             if node.type != 'vector':
+                varSymbol.assigned = True
                 expected_type = node.type
                 try:
                     given_type = self.extract_expr_type(node.expr, table)
@@ -246,11 +242,17 @@ class TeslangSemanticChecker(object):
                                         + '\' but got \'' + given_type + '\'')
                     symbol.assigned = True
                 elif isinstance(symbol, VectorSymbol):
-                    # TODO
-                    pass
-                    # if node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
-                    #     if not self.handle_list_function_error(node, table):
-                    #         symbol.length = node.expr.args.exprs[0].value
+                    rightSideExprType = self.extract_expr_type(node.expr, table)
+                    if rightSideExprType != 'vector':
+                        self.handle_error(node.pos, 'Type mismatch in vector assignment. Expected \'vector\' but got \''
+                                        + rightSideExprType + '\'')
+                    else:
+                        if node.expr.__class__.__name__ == 'ExprList':
+                            exprsListNode = node.expr
+                            symbol.length = len(exprsListNode.exprs)
+                        elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                            node.expr.accept(table)
+                            symbol.length = node.expr.args.exprs[0].value
                 else:
                     self.handle_error(node.pos, 'Can not use ' 
                                       + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in assignment')

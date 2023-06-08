@@ -1,6 +1,6 @@
 from SymbolTable import *
 from ply.lex import LexToken
-from AST import *
+import AST
 from colors import bcolors
 
 
@@ -9,13 +9,25 @@ class ExprNotFound(Exception):
 
       
 class PreParser(object):
+
+
     cast_var = {
         'NUMBER' : 'int',
         'STRING' : 'str',
     }
-    
-    def __init__(self):
-        pass
+
+    def push_builtins_to_table(self, table):
+        def create_list_func():
+            return FunctionSymbol('vector', 'list', AST.ParametersList([AST.Parameter('int', 'size')]))
+        def create_print_func():
+            return FunctionSymbol('null', 'print', AST.ParametersList([AST.Parameter('str', 'string_to_print')]))
+        def create_length_func():
+            return FunctionSymbol('int', 'length', AST.ParametersList([AST.Parameter('vector', 'vector_to_count')]))
+        table.put(create_list_func())
+        table.put(create_print_func())
+        table.put(create_length_func())
+        
+        
 
     def handle_error(self, pos, msg):
         print(bcolors.FAIL + 'Semantic error at line ' + str(pos.line) + bcolors.ENDC + ': ' + msg)

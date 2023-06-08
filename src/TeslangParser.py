@@ -58,11 +58,13 @@ class TeslangParser(object):
 
     def p_func_parameter_error(self, p):
         '''func : DEF TYPE ID LPAREN error RPAREN LBRACE body RBRACE'''
+        print("hello1")
         p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=None, body=p[8], pos=getPosition(p))
         self.handle_error('function definition', p[5])
 
     def p_func_missing_return_type_error(self, p):
         '''func : DEF error ID LPAREN flist RPAREN LBRACE body RBRACE'''
+        print("hello2")
         p[0] = FunctionDef(rettype='int', name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
         self.handle_error('function return type', p[2])
 
@@ -89,6 +91,7 @@ class TeslangParser(object):
     def p_stmt_error(self, p):
         '''stmt : error SEMI
                 | error'''
+        print("hello3")
         self.handle_error('statement', p[1])
 
 
@@ -186,6 +189,8 @@ class TeslangParser(object):
 
     def p_expr_error(self, p):
         '''expr : error'''
+        print("hello4")
+        # breakpoint()
         self.handle_error('expression', p[1])
 
     def p_expr_list(self, p: yacc.YaccProduction):
@@ -215,6 +220,7 @@ class TeslangParser(object):
 
     def p_function_call_error(self, p):
         '''function_call : ID LPAREN error RPAREN'''
+        print("hello5")
         self.handle_error('function call', p[3])
     
 

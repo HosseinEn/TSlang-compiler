@@ -20,6 +20,12 @@ def int main() {
 
     A[3] = test_assign + 4;
 
+    var vector hello;
+    # hello = [1,2,3,4,5,6,7,8,9,10];
+    hello = list(1);
+    hello[0] = 1
+    hello[10] = 1;
+
     find(A, a);
     find(A);
     find(a, A);
