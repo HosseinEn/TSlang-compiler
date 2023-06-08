@@ -26,6 +26,10 @@ class TeslangSemanticChecker(object):
         if expr_class_name == 'LexToken':
             if expr.type == 'ID':
                 id_search_res = table.get(expr.value)
+                if isinstance(id_search_res, VariableSymbol) and not id_search_res.assigned:
+                    file_pos_simulation_obj = type('obj', (object,), {'line' : expr.lineno})
+                    self.handle_error(file_pos_simulation_obj, '\'' + expr.value + '\' not assigned but used in a expression in function \''
+                                       + table.function.name + '\'')
                 if id_search_res:
                     return id_search_res.type
                 else:
@@ -40,7 +44,7 @@ class TeslangSemanticChecker(object):
         elif expr_class_name == 'FunctionCall':
             expr.accept(table)
             funcSymbol = table.get(expr.id)
-            if funcSymbol and funcSymbol.__class__.__name__ == 'FunctionSymbol':
+            if funcSymbol and isinstance(funcSymbol, FunctionSymbol):
                 return funcSymbol.rettype
             else:
                 raise ExprNotFound
@@ -85,7 +89,7 @@ class TeslangSemanticChecker(object):
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             for param in node.fmlparams.parameters:
-                varSymbol = VariableSymbol(param.type, param.id)
+                varSymbol = VariableSymbol(param.type, param.id, True)
                 if not child_table.put(varSymbol):
                     self.handle_error(
                         node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
@@ -102,7 +106,7 @@ class TeslangSemanticChecker(object):
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             for param in node.fmlparams.parameters:
-                varSymbol = VariableSymbol(param.type, param.id)
+                varSymbol = VariableSymbol(param.type, param.id, True)
                 if not child_table.put(varSymbol):
                     self.handle_error(
                         node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
@@ -191,20 +195,20 @@ class TeslangSemanticChecker(object):
                     exprsListNode = node.expr
                     varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
             except ExprNotFound:
-                breakpoint()
                 pass
         elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
             # TODO - handle list function
             # if not self.handle_list_function_error(node, table):
             varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)
         else:
-            varSymbol = VariableSymbol(node.type, node.id)
+            varSymbol = VariableSymbol(node.type, node.id, False)
 
         if not table.put(varSymbol):
             self.handle_error(node.pos, 'Symbol \'' + node.id + '\' of type \''
                                + node.type + '\' already defined')
 
         if node.expr is not None:
+            varSymbol.assigned = True
             if node.type != 'vector':
                 expected_type = node.type
                 try:
@@ -240,6 +244,7 @@ class TeslangSemanticChecker(object):
                     if given_type != expected_type:
                         self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
                                         + '\' but got \'' + given_type + '\'')
+                    symbol.assigned = True
                 elif isinstance(symbol, VectorSymbol):
                     # TODO
                     pass
@@ -268,7 +273,6 @@ class TeslangSemanticChecker(object):
                         + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  
 
                 else:
-                    # breakpoint()
                     if symbol.length <= node.index_expr.value or node.index_expr.value < 0:
                         self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
                                           + node.id + '\' can hold only ' + str(symbol.length) + ' values')
@@ -342,9 +346,5 @@ class TeslangSemanticChecker(object):
                     self.handle_error(node.pos, 'Invalid index type for \'' + symbol.name + '\'. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr, table) + '\'')        
             except ExprNotFound:
                 pass
-
-    def visit_TernaryExpr(self, node, table):
-        pass
-
 
 

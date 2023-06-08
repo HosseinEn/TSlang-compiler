@@ -16,6 +16,9 @@ def int main() {
     A[1] = "diofj";
     A[2] = 3;
     var vector akkk = [1, 2, 3, 4, 5];
+    var int test_assign;
+
+    A[3] = test_assign + 4;
 
     find(A, a);
     find(A);
@@ -29,7 +32,7 @@ def int test(str aaa) return 122;
 def int find(vector A, int n) {
     var int k;
     var float j;
-
+    
     for (i = 0 to 5) {
         if (n == k) {
             return j;

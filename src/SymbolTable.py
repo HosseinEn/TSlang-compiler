@@ -10,9 +10,10 @@ class Symbol(object):
 
 class VariableSymbol(Symbol):
 
-    def __init__(self, varType, name):
+    def __init__(self, varType, name, assigned):
         super(VariableSymbol, self).__init__(name)
         self.type = varType
+        self.assigned = assigned
 
 class VectorSymbol(Symbol):
     def __init__(self, name, length):
