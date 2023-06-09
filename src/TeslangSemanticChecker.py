@@ -67,6 +67,7 @@ class TeslangSemanticChecker(object):
                 pass
         elif expr_class_name == 'OperationOnList':
             expr.accept(table)
+            return 'int'
         return 'unknown'
 
 
@@ -161,15 +162,18 @@ class TeslangSemanticChecker(object):
         try: 
             leftExprType = self.extract_expr_type(node.left, table)
             rightExprType = self.extract_expr_type(node.right, table)
+
             if leftExprType == 'vector' or rightExprType == 'vector':
                 self.handle_error(node.pos, 'Vector operations not supported')
 
             if node.op in ('*', '/', '%', '-'):
-                if leftExprType != 'int' or rightExprType != 'int':
+                both_are_int = (leftExprType == 'int' and rightExprType == 'int')
+                if not both_are_int:
                     self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, - can only be used with numbers')
             elif node.op == '+':
-                if not (leftExprType == 'int' and rightExprType == 'int') or \
-                not (leftExprType == 'str' and rightExprType == 'str'):
+                both_are_int = (leftExprType == 'int' and rightExprType == 'int')
+                both_are_str = (leftExprType == 'str' and rightExprType == 'str')
+                if not both_are_int and not both_are_str:
                     # breakpoint()
                     self.handle_error(node.pos, 'Type mismatch in binary expression. + can only be used with numbers or strings')
             else: 
