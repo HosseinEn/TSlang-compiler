@@ -25,13 +25,14 @@ class TeslangSemanticChecker(object):
         expr_class_name = expr.__class__.__name__
         if expr_class_name == 'LexToken':
             if expr.type == 'ID':
-                id_search_res = table.get(expr.value)
-                if isinstance(id_search_res, VariableSymbol) and not id_search_res.assigned:
+                symbol = table.get(expr.value)
+                if isinstance(symbol, VariableSymbol) and not symbol.assigned:
                     file_pos_simulation_obj = type('obj', (object,), {'line' : expr.lineno})
                     self.handle_error(file_pos_simulation_obj, '\'' + expr.value + '\' not assigned but used in a expression in function \''
                                        + table.function.name + '\'')
-                if id_search_res:
-                    return id_search_res.type
+                if symbol:
+                    if isinstance(symbol, VariableSymbol):
+                        return symbol.type
                 else:
                     file_pos_simulation_obj = type('obj', (object,), {'line' : expr.lineno})
                     self.handle_error(file_pos_simulation_obj, 'Variable \'' + expr.value +
@@ -169,6 +170,7 @@ class TeslangSemanticChecker(object):
             elif node.op == '+':
                 if not (leftExprType == 'int' and rightExprType == 'int') or \
                 not (leftExprType == 'str' and rightExprType == 'str'):
+                    # breakpoint()
                     self.handle_error(node.pos, 'Type mismatch in binary expression. + can only be used with numbers or strings')
             else: 
                 pass
@@ -330,6 +332,8 @@ class TeslangSemanticChecker(object):
             elif self.extract_expr_type(node.end_expr, table) != 'int':
                 self.handle_error(node.pos, 'Invalid expression type in for loop end range. Expected \'int\' but got \'' 
                                   + self.extract_expr_type(node.end_expr, table) + '\'')    
+            if hasattr(node.for_statement, 'accept'):
+                node.for_statement.accept(table)
         except ExprNotFound:
             pass
 

@@ -63,7 +63,6 @@ class TeslangParser(object):
 
     def p_func_missing_return_type_error(self, p):
         '''func : DEF error ID LPAREN flist RPAREN LBRACE body RBRACE'''
-        print("hello2")
         p[0] = FunctionDef(rettype='int', name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
         self.handle_error('function return type', p[2])
 
@@ -216,7 +215,6 @@ class TeslangParser(object):
 
     def p_function_call_error(self, p):
         '''function_call : ID LPAREN error RPAREN'''
-        print("hello5")
         self.handle_error('function call', p[3])
     
 
