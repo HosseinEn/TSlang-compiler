@@ -51,7 +51,7 @@ class TeslangParser(object):
     def p_func(self, p: yacc.YaccProduction):
         '''func : DEF TYPE ID LPAREN flist RPAREN LBRACE body RBRACE
                 | DEF TYPE ID LPAREN flist RPAREN RETURN expr SEMI'''
-        if isinstance(p[8], Body):
+        if isinstance(p[8], Body) or p[8] is None:
             p[0] = FunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], body=p[8], pos=getPosition(p))
         else:
             p[0] = BodyLessFunctionDef(rettype=p[2], name=p[3], fmlparams=p[5], expr=p[8], pos=getPosition(p))
@@ -174,8 +174,6 @@ class TeslangParser(object):
                 | function_call 
                 | NUMBER                           
                 | STRING'''
-        # TODO what should be done for vector declaration?
-        # TODO check vector out - expr [expr] and [clist]
         if len(p) == 4 or len(p) == 3:
             if p[1] == '-':
                 p[2].value = -p[2].value
@@ -187,11 +185,11 @@ class TeslangParser(object):
             else:
                 p[0] = p[1]
 
-    def p_expr_error(self, p):
-        '''expr : error'''
-        print("hello4")
-        # breakpoint()
-        self.handle_error('expression', p[1])
+    # def p_expr_error(self, p):
+    #     '''expr : error'''
+    #     print("hello4")
+    #     breakpoint()            
+    #     self.handle_error('expression', p[1])
 
     def p_expr_list(self, p: yacc.YaccProduction):
         '''expr_list : LBRACKET clist RBRACKET'''
@@ -218,10 +216,10 @@ class TeslangParser(object):
         '''function_call : ID LPAREN clist RPAREN'''
         p[0] = FunctionCall(id=p[1], args=p[3], pos=getPosition(p))
 
-    def p_function_call_error(self, p):
-        '''function_call : ID LPAREN error RPAREN'''
-        print("hello5")
-        self.handle_error('function call', p[3])
+    # def p_function_call_error(self, p):
+    #     '''function_call : ID LPAREN error RPAREN'''
+    #     print("hello5")
+    #     self.handle_error('function call', p[3])
     
 
     def p_binary_expr(self, p: yacc.YaccProduction):

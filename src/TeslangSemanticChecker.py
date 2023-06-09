@@ -98,6 +98,7 @@ class TeslangSemanticChecker(object):
         child_table.show_unused_warning()
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
+        # breakpoint()
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
             if parent_table.get(node.name).redefined:
