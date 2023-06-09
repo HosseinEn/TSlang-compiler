@@ -1,5 +1,7 @@
 from colors import bcolors
 
+BUILTIN_FUNCS = ['main', 'print', 'length', 'list']
+
 class Symbol(object):
     def __init__(self, name):
         self.name = name
@@ -70,7 +72,7 @@ class SymbolTable(object):
 
     def show_unused_warning(self):
         for key in self.table:
-            if not self.table[key].used and self.table[key].name != 'main':
+            if not self.table[key].used and self.table[key].name not in BUILTIN_FUNCS:
                 symbolType = 'variable' if isinstance(self.table[key], VariableSymbol) else 'function'
                 if isinstance(self.table[key], VariableSymbol) and self.function:
                     position = ' at function \'' + self.function.name + '\''
