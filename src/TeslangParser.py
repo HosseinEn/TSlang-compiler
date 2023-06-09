@@ -27,6 +27,7 @@ class TeslangParser(object):
 
 
     precedence = (
+        ('nonassoc', 'ASSEXPR'),
         ('left', 'LOR'),
         ('left', 'LAND'),
         ('left', 'OR', 'XOR', 'AND'),
@@ -198,7 +199,7 @@ class TeslangParser(object):
         p[0] = OperationOnList(expr=p[1], index_expr=p[3], pos=getPosition(p))
 
     def p_assignment(self, p: yacc.YaccProduction):
-        '''assignment : ID EQUALS expr
+        '''assignment : ID EQUALS expr %prec ASSEXPR
                       | ID LBRACKET expr RBRACKET EQUALS expr'''
         if len(p) == 4:
             p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
