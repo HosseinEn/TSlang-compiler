@@ -175,6 +175,8 @@ class TeslangParser(object):
         if len(p) == 4 or len(p) == 3:
             if p[1] == '-':
                 p[2].value = -p[2].value
+            elif p[1] == '!':
+                p[2].value = 0 if p[2].value else 1
             p[0] = p[2]
         else:
             # TODO - potential bug

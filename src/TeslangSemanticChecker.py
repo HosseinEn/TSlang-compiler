@@ -367,7 +367,7 @@ class TeslangSemanticChecker(object):
 
     def visit_TernaryExpr(self, node, table):
         if hasattr(node.cond, 'accept'):
-            node.expr.accept(table)
+            node.cond.accept(table)
         if hasattr(node.first_expr, 'accept'):
             node.first_expr.accept(table)
         if hasattr(node.second_expr, 'accept'):
