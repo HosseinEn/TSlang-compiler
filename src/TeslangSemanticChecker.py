@@ -57,7 +57,7 @@ class TeslangSemanticChecker(object):
             expr.accept(table)
             return 'vector'
         elif expr_class_name == 'TernaryExpr':
-            pass
+            expr.accept(table)
         elif expr_class_name == 'BinExpr':
             expr.accept(table)
             try:
@@ -365,4 +365,10 @@ class TeslangSemanticChecker(object):
             except ExprNotFound:
                 pass
 
-
+    def visit_TernaryExpr(self, node, table):
+        if hasattr(node.cond, 'accept'):
+            node.expr.accept(table)
+        if hasattr(node.first_expr, 'accept'):
+            node.first_expr.accept(table)
+        if hasattr(node.second_expr, 'accept'):
+            node.second_expr.accept(table)

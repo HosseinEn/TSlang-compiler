@@ -4039,6 +4039,12 @@ state 115
 
     SEMI            reduce using rule 61 (binary_expr -> expr EQ expr .)
     LBRACKET        reduce using rule 61 (binary_expr -> expr EQ expr .)
+    QUESTIONMARK    reduce using rule 61 (binary_expr -> expr EQ expr .)
+    PLUS            reduce using rule 61 (binary_expr -> expr EQ expr .)
+    MINUS           reduce using rule 61 (binary_expr -> expr EQ expr .)
+    TIMES           reduce using rule 61 (binary_expr -> expr EQ expr .)
+    DIVIDE          reduce using rule 61 (binary_expr -> expr EQ expr .)
+    MODULO          reduce using rule 61 (binary_expr -> expr EQ expr .)
     GT              reduce using rule 61 (binary_expr -> expr EQ expr .)
     LT              reduce using rule 61 (binary_expr -> expr EQ expr .)
     EQ              reduce using rule 61 (binary_expr -> expr EQ expr .)
@@ -4052,20 +4058,14 @@ state 115
     RPAREN          reduce using rule 61 (binary_expr -> expr EQ expr .)
     COLON           reduce using rule 61 (binary_expr -> expr EQ expr .)
     TO              reduce using rule 61 (binary_expr -> expr EQ expr .)
-    QUESTIONMARK    shift and go to state 70
-    PLUS            shift and go to state 71
-    MINUS           shift and go to state 72
-    TIMES           shift and go to state 73
-    DIVIDE          shift and go to state 74
-    MODULO          shift and go to state 75
 
-  ! QUESTIONMARK    [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
-  ! PLUS            [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
-  ! MINUS           [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
-  ! TIMES           [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
-  ! DIVIDE          [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
-  ! MODULO          [ reduce using rule 61 (binary_expr -> expr EQ expr .) ]
   ! LBRACKET        [ shift and go to state 69 ]
+  ! QUESTIONMARK    [ shift and go to state 70 ]
+  ! PLUS            [ shift and go to state 71 ]
+  ! MINUS           [ shift and go to state 72 ]
+  ! TIMES           [ shift and go to state 73 ]
+  ! DIVIDE          [ shift and go to state 74 ]
+  ! MODULO          [ shift and go to state 75 ]
   ! GT              [ shift and go to state 76 ]
   ! LT              [ shift and go to state 77 ]
   ! EQ              [ shift and go to state 78 ]

@@ -36,6 +36,7 @@ class TeslangParser(object):
         ('left', 'TIMES', 'DIVIDE', 'MODULO'),
         ('right', 'UMINUS'),
         ('left', 'QUESTIONMARK', 'COLON'),
+        ('nonassoc', 'DBLEQ'),
         ('left', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
         ('left', 'COMMA'),
         ('right', 'EQUALS', 'LNOT', 'NOT', 'INCREMENT', 'DECREMENT'), # EQUALS: =, EQ: ==
@@ -85,6 +86,7 @@ class TeslangParser(object):
                 | for_loop 
                 | block                  
                 | func'''
+        # print(p[1])
         p[0] = p[1]
 
     def p_stmt_error(self, p):
@@ -148,8 +150,6 @@ class TeslangParser(object):
         '''clist : empty
                  | expr
                  | expr COMMA clist'''
-        # TODO check this out after defining functionCall
-        # this is same as expr list
         if len(p) == 2:
             exprs = [] if p[1] == [] else [p[1]]
             p[0] = ExprList(exprs=exprs)
@@ -182,6 +182,7 @@ class TeslangParser(object):
                 p[0] = p.slice[1]
             else:
                 p[0] = p[1]
+        # print(p[1])        
 
     # def p_expr_error(self, p):
     #     '''expr : error'''
@@ -202,6 +203,7 @@ class TeslangParser(object):
         '''assignment : ID EQUALS expr %prec ASSEXPR
                       | ID LBRACKET expr RBRACKET EQUALS expr'''
         if len(p) == 4:
+            print(p[3])
             p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
         else:
             p[0] = VectorAssignment(id=p[1], index_expr=p[3], expr=p[6], pos=getPosition(p))
@@ -227,7 +229,7 @@ class TeslangParser(object):
                        | expr MODULO expr                 
                        | expr GT expr                     
                        | expr LT expr                     
-                       | expr EQ expr                     
+                       | expr EQ expr %prec DBLEQ                
                        | expr LE expr                     
                        | expr GE expr                     
                        | expr NE expr                     
