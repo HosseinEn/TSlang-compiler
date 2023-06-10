@@ -7,6 +7,9 @@ class Symbol(object):
         self.name = name
         self.used = False
 
+    def mark_as_used(self):
+        self.used = True
+
     def __str__(self):
         return '<{name}>'.format(name=self.name)
 
@@ -51,10 +54,10 @@ class SymbolTable(object):
     def mark_as_defined(self, key):
         self.table[key].redefined = True
 
+
     def get(self, name, current_scope=False):
         symbol = self.table.get(name)
         if symbol is not None:
-            symbol.used = True
             return symbol
         elif not current_scope and self.getParent() is not None:
             return self.getParent().get(name)

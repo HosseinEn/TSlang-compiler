@@ -31,6 +31,7 @@ class TeslangSemanticChecker(object):
                     self.handle_error(file_pos_simulation_obj, '\'' + expr.value + '\' not assigned but used in a expression in function \''
                                        + table.function.name + '\'')
                 if symbol:
+                    symbol.mark_as_used()
                     if isinstance(symbol, VariableSymbol):
                         return symbol.type
                 else:
@@ -46,6 +47,7 @@ class TeslangSemanticChecker(object):
             expr.accept(table)
             funcSymbol = table.get(expr.id)
             if funcSymbol and isinstance(funcSymbol, FunctionSymbol):
+                funcSymbol.mark_as_used()
                 return funcSymbol.rettype
             else:
                 raise ExprNotFound
@@ -100,7 +102,6 @@ class TeslangSemanticChecker(object):
         child_table.show_unused_warning()
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
-        # breakpoint()
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
             if parent_table.get(node.name).redefined:
@@ -116,7 +117,11 @@ class TeslangSemanticChecker(object):
         try:
             expr_type = self.extract_expr_type(node.expr, child_table)
             if expr_type != funcSymbol.rettype:
-                self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
+                if funcSymbol.rettype == 'null':
+                    self.handle_error(node.pos, 'Function \'' + node.name + '\'' + ' doesn\'t return any thing but got \'' +
+                                       expr_type + '\'')
+                else:
+                    self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
                                   + '\' but got \'' + expr_type + '\'')
         except ExprNotFound:
             pass
@@ -140,6 +145,7 @@ class TeslangSemanticChecker(object):
                                table.function.name + '\'')
         else:
             funcSymbol = symbol_table_search_res
+            funcSymbol.mark_as_used()
             params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
             if len(node.args.exprs) != params_count:
                 self.handle_error(
@@ -174,7 +180,6 @@ class TeslangSemanticChecker(object):
                 both_are_int = (leftExprType == 'int' and rightExprType == 'int')
                 both_are_str = (leftExprType == 'str' and rightExprType == 'str')
                 if not both_are_int and not both_are_str:
-                    # breakpoint()
                     self.handle_error(node.pos, 'Type mismatch in binary expression. + can only be used with numbers or strings')
             else: 
                 pass
@@ -241,6 +246,7 @@ class TeslangSemanticChecker(object):
                               + table.function.name + '\'')
         else:
             try:
+                symbol.mark_as_used()
                 if isinstance(symbol, VariableSymbol):
                     expected_type = symbol.type
                     given_type = self.extract_expr_type(node.expr, table)
@@ -277,6 +283,7 @@ class TeslangSemanticChecker(object):
                 self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment in function \'' +
                                    table.function.name +'\'')
             else:
+                symbol.mark_as_used()
                 if not isinstance(symbol, VectorSymbol):
                     self.handle_error(node.pos, 'Can not use ' 
                         + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  

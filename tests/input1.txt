@@ -1,170 +1,172 @@
 
-# def int main() {
-#     def int something() {
-#         print("hello");
-#         return 'sojid';
-#     }
-#     # var int A;
-#     # A = list();
-#     var int a;
+def int main() {
+    def int something() {
+        print("hello");
+        return 'sojid';
+    }
+    # var int A;
+    # A = list();
+    var int a;
 
-#     # var vector A = list(5);
-#     var vector A = [1,2,3,4];
+    # var vector A = list(5);
+    var vector A = [1,2,3,4];
 
 
-#     A[0] = 1;
-#     A[1] = "diofj";
-#     A[2] = 3;
-#     var vector akkk = [1, 2, 3, 4, 5];
-#     var int test_assign;
+    A[0] = 1;
+    A[1] = "diofj";
+    A[2] = 3;
+    var vector akkk = [1, 2, 3, 4, 5];
+    var int test_assign;
 
-#     A[3] = test_assign + 4;
+    A[3] = test_assign + 4;
 
-#     var vector hello;
-#     # hello = [1,2,3,4,5,6,7,8,9,10];
-#     hello = list(1);
-#     hello[0] = 1
-#     hello[10] = 1;
+    var vector hello;
+    # hello = [1,2,3,4,5,6,7,8,9,10];
+    hello = list(1);
+    hello[0] = 1
+    hello[10] = 1;
 
-#     find(A, a);
-#     find(A);
-#     find(a, A);
+    find(A, a);
+    find(A);
+    find(a, A);
 
-#     return A;
-# }
+    return A;
+}
 
-# def int test(str aaa) return 122;
+def int test(str aaa) return 122;
 
-# def int find(vector A, int n) {
-#     var int k;
-#     var float j;
+def int find(vector A, int n) {
+    var int k;
+    var float j;
     
-#     for (i = 0 to 5) {
-#         if (n == k) {
-#             return j;
-#         }
-#         j = j + 1;
-#     }   
+    for (i = 0 to 5) {
+        if (n == k) {
+            return j;
+        }
+        j = j + 1;
+    }   
 
-#     return -1;
+    return -1;
+}
+
+def null redf(int x) {
+
+}
+def null redf(int x) {
+
+}
+
+def str something1() {
+    var vector hel = 'ijoo';
+    com(-2*com(), first_arg, [second_arg, 1]);
+    {
+        var int hel = 5;
+    }
+
+    var int some = 3 + 4 * -5;
+    if (halo == +2) 
+        if (x == 2)
+            print("aa");
+    else
+        if (x == 2)
+            print ("hello");
+
+
+
+}
+
+def null  com(str x, str bo, int y) {
+    var str something;
+    #x = xDSFDS + 2;
+    a = "hello";
+    #something[2] = 40;
+    2 * [2,1,4,5];
+    #2 * 2 = 5;
+    print(data[j]);
+    if ('jjj') {
+        for (j = 0 to com()) {
+            print(data[j]);
+        }
+        print("jjjj");
+    }
+    #var str x = "hello";
+    something = 34;
+    {
+        var str something;
+    }
+    #oello[whatchme];
+    while('jfjf' {
+        yy();
+        oisjdoij();
+        2 * 'jjj';
+    }
+}
+
+
+
+
+
+
+
+def int com() {
+    def str ok_there() {
+        print("yes");
+    }
+    ok_there);
+    print('dio');
+    return something();
+}
+
+
+
+    # if (a > b) 
+    #     print(a); 
+    #     if (a < b) 
+    #        print(a);
+    #   else 
+    #       print(a);
+
+
+
+def null combination(int n, int r, int index, vector data, int i) { 
+    # Current combination is ready to be printed, print it
+    if (index == r) {
+        for (j = 0 to r) {
+            print(data[j]);
+        }
+        print("jjjj");
+    }
+    var str x = "hello";
+    # When no more elements are there to put in data[]
+    if (i >= n) {
+       # do break or return something
+    }
+    # current is included, put next at next location
+   #  data[index] = i;
+    combination(n, r, index + 1, data, i + 1);
+    # current is excluded, replace it with next (Note that
+    # i+1 is passed, but index is not changed)
+    combination(n, r, index, data, i + 1);
+}
+
+
+# int main (void) {
+#     int x = a546f;
+#     int A[54a] = 5;
+#     'A' = x;
+#     if (x 10 {
+#         retur 5;
+#     }
+# }
+# def int main() {
+#     #var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
 # }
 
-# def null redf(int x) {
-
-# }
-# def null redf(int x) {
-
-# }
-
-# def str something1() {
-#     var vector hel = 'ijoo';
-#     com(-2*com(), first_arg, [second_arg, 1]);
-#     {
-#         var int hel = 5;
-#     }
-
-#     var int some = 3 + 4 * -5;
-#     if (halo == +2) 
-#         if (x == 2)
-#             print("aa");
-#     else
-#         if (x == 2)
-#             print ("hello");
 
 
-
-# }
-
-# def null  com(str x, str bo, int y) {
-#     var str something;
-#     #x = xDSFDS + 2;
-#     a = "hello";
-#     #something[2] = 40;
-#     2 * [2,1,4,5];
-#     #2 * 2 = 5;
-#     print(data[j]);
-#     if ('jjj') {
-#         for (j = 0 to com()) {
-#             print(data[j]);
-#         }
-#         print("jjjj");
-#     }
-#     #var str x = "hello";
-#     something = 34;
-#     {
-#         var str something;
-#     }
-#     #oello[whatchme];
-#     while('jfjf' {
-#         yy();
-#         oisjdoij();
-#         2 * 'jjj';
-#     }
-# }
-
-
-
-
-
-
-
-# def int com() {
-#     def str ok_there() {
-#         print("yes");
-#     }
-#     ok_there);
-#     print('dio');
-#     return something();
-# }
-
-
-
-#     # if (a > b) 
-#     #     print(a); 
-#     #     if (a < b) 
-#     #        print(a);
-#     #   else 
-#     #       print(a);
-
-
-
-# def null combination(int n, int r, int index, vector data, int i) { 
-#     # Current combination is ready to be printed, print it
-#     if (index == r) {
-#         for (j = 0 to r) {
-#             print(data[j]);
-#         }
-#         print("jjjj");
-#     }
-#     var str x = "hello";
-#     # When no more elements are there to put in data[]
-#     if (i >= n) {
-#        # do break or return something
-#     }
-#     # current is included, put next at next location
-#    #  data[index] = i;
-#     combination(n, r, index + 1, data, i + 1);
-#     # current is excluded, replace it with next (Note that
-#     # i+1 is passed, but index is not changed)
-#     combination(n, r, index, data, i + 1);
-# }
-
-
-# # int main (void) {
-# #     int x = a546f;
-# #     int A[54a] = 5;
-# #     'A' = x;
-# #     if (x 10 {
-# #         retur 5;
-# #     }
-# # }
-# # def int main() {
-# #     #var str text = "I was there. \\"yellow! I will be there\\" Sasha said. that was all."
-# # }
-
-
-
-
+def null main() {
+    sum(ds oidf oidfj);
+}
 
 
 def int sum(vector numList) {
@@ -176,38 +178,38 @@ def int sum(vector numList) {
     return result;
 }
 
-# def str concatenate(int lengthOfString) {
-#     int i = 0;
-#     var vector b = [1, 2, 3, 4];
-#     print(x);
-#     # while (i < lengthOfString) {
-#     #     print(x);
-#     # }
-# }
+def str concatenate(int lengthOfString) {
+    int i = 0;
+    var vector b = [1, 2, 3, 4];
+    print(x);
+    # while (i < lengthOfString) {
+    #     print(x);
+    # }
+}
 
 # # recursive combination function
 
-# def void combination(int n, int r, int index, vector data, int i) { 
-#     # Current combination is ready to be printed, print it
-#     if (index == r) {
-#         for (j = 0 to r) {
-#             print(data[j]);
-#         }
-#         print("jjjj");
-#         return ;
-#     }
-#     var str x = "hello";
-#     # When no more elements are there to put in data[]
-#     if (i >= n) {
-#         return;
-#     }
-#     # current is included, put next at next location
-#     data[index] = i;
-#     combination(n, r, index + 1, data, i + 1);
-#     # current is excluded, replace it with next (Note that
-#     # i+1 is passed, but index is not changed)
-#     combination(n, r, index, data, i + 1);
-# }
+def void combination(int n, int r, int index, vector data, int i) { 
+    # Current combination is ready to be printed, print it
+    if (index == r) {
+        for (j = 0 to r) {
+            print(data[j]);
+        }
+        print("jjjj");
+        return ;
+    }
+    var str x = "hello";
+    # When no more elements are there to put in data[]
+    if (i >= n) {
+        return;
+    }
+    # current is included, put next at next location
+    data[index] = i;
+    combination(n, r, index + 1, data, i + 1);
+    # current is excluded, replace it with next (Note that
+    # i+1 is passed, but index is not changed)
+    combination(n, r, index, data, i + 1);
+}
 
 # def int max(int[] arr) {
 #     int max_val = arr[0];

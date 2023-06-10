@@ -27,7 +27,6 @@ Unused terminals:
     IS
     LAMBDA
     LEN
-    LENGTH
     LSHIFT
     MINUSEQUAL
     MODEQUAL
@@ -172,7 +171,6 @@ LBRACE               : 3 5 6 24
 LBRACKET             : 46 47 48 50
 LE                   : 62
 LEN                  : 
-LENGTH               : 
 LNOT                 : 37
 LOR                  : 65
 LPAREN               : 3 4 5 6 20 21 22 23 52 53

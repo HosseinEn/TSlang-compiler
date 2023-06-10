@@ -45,7 +45,7 @@ class TeslangLexer(object):
         'is': 'IS',
         'lambda': 'LAMBDA',
         'len': 'LEN',
-        'length': 'LENGTH',
+        # 'length': 'LENGTH',
         'None': 'ONE',
         'nonlocal': 'NONLOCAL',
         'null': 'NULL',
