@@ -86,7 +86,6 @@ class TeslangParser(object):
                 | for_loop 
                 | block                  
                 | func'''
-        # print(p[1])
         p[0] = p[1]
 
     def p_stmt_error(self, p):
@@ -205,7 +204,6 @@ class TeslangParser(object):
         '''assignment : ID EQUALS expr %prec ASSEXPR
                       | ID LBRACKET expr RBRACKET EQUALS expr'''
         if len(p) == 4:
-            print(p[3])
             p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
         else:
             p[0] = VectorAssignment(id=p[1], index_expr=p[3], expr=p[6], pos=getPosition(p))
