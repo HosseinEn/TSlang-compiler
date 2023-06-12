@@ -1,17 +1,13 @@
 import ply.yacc as yacc
-import logging
 from TeslangLexer import *
-from AST  import *
-from ply.lex import LexToken
+from AST import *
 from colors import bcolors
 
 
-
-
-
 class FilePosition(object):
-  def __init__(self, line):
-    self.line = line
+    def __init__(self, line):
+        self.line = line
+
 
 def getPosition(p):
     return FilePosition(p.lexer.lexer.lineno - 1)
@@ -22,9 +18,8 @@ class TeslangParser(object):
         self.pre_parse = pre_parse
         self.scanner = TeslangLexer()
         self.scanner.build()
-    
-    tokens = TeslangLexer.tokens
 
+    tokens = TeslangLexer.tokens
 
     precedence = (
         ('nonassoc', 'ASSEXPR'),
@@ -39,7 +34,7 @@ class TeslangParser(object):
         ('nonassoc', 'DBLEQ'),
         ('left', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
         ('left', 'COMMA'),
-        ('right', 'EQUALS', 'LNOT', 'NOT', 'INCREMENT', 'DECREMENT'), # EQUALS: =, EQ: ==
+        ('right', 'EQUALS', 'LNOT', 'NOT', 'INCREMENT', 'DECREMENT'),  # EQUALS: =, EQ: ==
     )
 
     # Rule 1
@@ -76,7 +71,7 @@ class TeslangParser(object):
             p[0] = Body(statement=p[1], body=p[2])
 
     # Rule 4
-    def p_stmt(self, p: yacc.YaccProduction):    
+    def p_stmt(self, p: yacc.YaccProduction):
         '''stmt : expr SEMI                                
                 | defvar SEMI
                 | return_instr SEMI
@@ -93,8 +88,6 @@ class TeslangParser(object):
                 | error'''
         self.handle_error('statement', p[1])
 
-
-    
     def p_single_if(self, p: yacc.YaccProduction):
         '''single_if : IF LPAREN expr RPAREN stmt'''
         p[0] = IfOrIfElseInstruction(cond=p[3], if_statement=p[5], \
@@ -103,7 +96,7 @@ class TeslangParser(object):
     def p_if_with_else(self, p: yacc.YaccProduction):
         '''if_with_else : IF LPAREN expr RPAREN stmt ELSE stmt'''
         p[0] = IfOrIfElseInstruction(cond=p[3], if_statement=p[5], \
-                                      else_statement=p[7], pos=getPosition(p))
+                                     else_statement=p[7], pos=getPosition(p))
 
     def p_while_loop(self, p: yacc.YaccProduction):
         '''while_loop : WHILE LPAREN expr RPAREN stmt'''
@@ -112,12 +105,11 @@ class TeslangParser(object):
     def p_for_loop(self, p: yacc.YaccProduction):
         '''for_loop : FOR LPAREN ID EQUALS expr TO expr RPAREN stmt'''
         p[0] = ForInstruction(start_expr=p[5], end_expr=p[7], \
-                                for_statement=p[9], pos=getPosition(p))
+                              for_statement=p[9], pos=getPosition(p))
 
     def p_block(self, p: yacc.YaccProduction):
         '''block : LBRACE body RBRACE'''
         p[0] = Block(body=p[2])
-
 
     def p_return_instr(self, p: yacc.YaccProduction):
         '''return_instr : RETURN expr'''
@@ -143,7 +135,6 @@ class TeslangParser(object):
         elif len(p) == 5:
             p[0] = ParametersList(parameters=p[4].parameters + [Parameter(type=p[1], id=p[2])])
 
-
     # Rule 7
     def p_clist(self, p: yacc.YaccProduction):
         '''clist : empty
@@ -155,10 +146,8 @@ class TeslangParser(object):
         elif len(p) == 4:
             p[0] = ExprList(exprs=p[3].exprs + [p[1]])
 
-        
-
     # Rule 9
-    def p_expr(self, p: yacc.YaccProduction):    
+    def p_expr(self, p: yacc.YaccProduction):
         '''expr : operation_on_list               
                 | expr_list                   
                 | ternary_expr                
@@ -183,13 +172,6 @@ class TeslangParser(object):
                 p[0] = p.slice[1]
             else:
                 p[0] = p[1]
-        # print(p[1])        
-
-    # def p_expr_error(self, p):
-    #     '''expr : error'''
-    #     print("hello4")
-    #     breakpoint()            
-    #     self.handle_error('expression', p[1])
 
     def p_expr_list(self, p: yacc.YaccProduction):
         '''expr_list : LBRACKET clist RBRACKET'''
@@ -207,7 +189,7 @@ class TeslangParser(object):
             p[0] = Assignment(id=p[1], expr=p[3], pos=getPosition(p))
         else:
             p[0] = VectorAssignment(id=p[1], index_expr=p[3], expr=p[6], pos=getPosition(p))
-        
+
     def p_ternary_expr(self, p: yacc.YaccProduction):
         '''ternary_expr : expr QUESTIONMARK expr COLON expr  '''
         p[0] = TernaryExpr(cond=p[1], first_expr=p[3], second_expr=p[5], pos=getPosition(p))
@@ -219,7 +201,6 @@ class TeslangParser(object):
     def p_function_call_error(self, p):
         '''function_call : ID LPAREN error RPAREN'''
         self.handle_error('function call', p[3])
-    
 
     def p_binary_expr(self, p: yacc.YaccProduction):
         '''binary_expr : expr PLUS expr                   
@@ -245,17 +226,11 @@ class TeslangParser(object):
 
     def handle_error(self, where, p):
         if not self.pre_parse:
-            print(bcolors.FAIL + f'Syntax error'  +  f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
-                bcolors.ENDC +  f' in {where} with token {p}')
+            print(bcolors.FAIL + f'Syntax error' + f' at line {p.lineno}, column {self.scanner.find_token_column(p)}' +
+                  bcolors.ENDC + f' in {where} with token {p}')
 
     def p_error(self, p):
         if p is not None:
             pass
         else:
             print('Unexpected end of input')
-
-
-
-
-
-
