@@ -226,18 +226,7 @@ class TeslangSemanticChecker(object):
                                         + '\' but got \'' + given_type + '\'')
                 except ExprNotFound:
                     pass
-                
-    # def handle_list_function_error(self, node, table):
-    #     # if len(node.expr.args) != 1:
-    #     #     self.handle_error(node.pos, 'Function \'list\' called with wrong number of arguments. Expected 1 but got ' 
-    #     #                       + str(len(node.expr.args)) + '.')
-    #     #     return True
-    #     # elif self.extract_expr_type(node.exprs.args.exprs[0], table) != 'int':
-    #     #     self.handle_error(node.pos, 'Function \'list\' called with wrong type of arguments. Expected \'int\' but got \'' 
-    #     #                       + self.extract_expr_type(node.exprs.args.exprs[0], table) + '\'')
-    #     #     return True
-    #     # else:
-    #     return False
+
 
     def visit_Assignment(self, node, table: SymbolTable):
         symbol = table.get(node.id)
