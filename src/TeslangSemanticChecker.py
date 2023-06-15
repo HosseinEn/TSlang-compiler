@@ -1,6 +1,5 @@
 from SymbolTable import *
-from ply.lex import LexToken
-from AST import *
+import AST
 from colors import bcolors
 
 
@@ -16,14 +15,10 @@ class TeslangSemanticChecker(object):
     
     def __init__(self):
         pass
-    
-    def both_exprs_are_numbers(self, left, right):
-        return left.type == 'NUMBER' and right.type == 'NUMBER'
-
 
     def extract_expr_type(self, expr, table):
-        expr_class_name = expr.__class__.__name__
-        if expr_class_name == 'LexToken':
+        expr_class_name = expr.__class__
+        if expr_class_name.__name__ == 'LexToken':
             if expr.type == 'ID':
                 symbol = table.get(expr.value)
                 if isinstance(symbol, VariableSymbol) and not symbol.assigned:
@@ -41,9 +36,9 @@ class TeslangSemanticChecker(object):
                     raise ExprNotFound
             else:
                 return self.cast_var[expr.type]
-        elif expr_class_name == 'ExprList':
+        elif expr_class_name == AST.ExprList:
             return 'vector'
-        elif expr_class_name == 'FunctionCall':
+        elif expr_class_name == AST.FunctionCall:
             expr.accept(table)
             funcSymbol = table.get(expr.id)
             if funcSymbol and isinstance(funcSymbol, FunctionSymbol):
@@ -51,14 +46,14 @@ class TeslangSemanticChecker(object):
                 return funcSymbol.rettype
             else:
                 raise ExprNotFound
-        elif expr_class_name == 'Assignment':
+        elif expr_class_name == AST.Assignment:
             expr.accept(table)
-        elif expr_class_name == 'VectorAssignment':
+        elif expr_class_name == AST.VectorAssignment:
             expr.accept(table)
             return 'vector'
-        elif expr_class_name == 'TernaryExpr':
+        elif expr_class_name == AST.TernaryExpr:
             expr.accept(table)
-        elif expr_class_name == 'BinExpr':
+        elif expr_class_name == AST.BinExpr:
             expr.accept(table)
             try:
                 left_type = self.extract_expr_type(expr.left, table)
@@ -67,7 +62,7 @@ class TeslangSemanticChecker(object):
                     return left_type
             except ExprNotFound:
                 pass
-        elif expr_class_name == 'OperationOnList':
+        elif expr_class_name == AST.OperationOnList:
             expr.accept(table)
             return 'int'
         return 'unknown'
@@ -200,10 +195,10 @@ class TeslangSemanticChecker(object):
                     # Handling error by passing vector length as zero to show more errors
                     varSymbol = VectorSymbol(node.id, 0)
                 else:
-                    if node.expr.__class__.__name__ == 'ExprList':
+                    if node.expr.__class__ == AST.ExprList:
                         exprsListNode = node.expr
                         varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
-                    elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                    elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
                         node.expr.accept(table)
                         varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)                        
             except ExprNotFound:
@@ -249,10 +244,10 @@ class TeslangSemanticChecker(object):
                         self.handle_error(node.pos, 'Type mismatch in vector assignment. Expected \'vector\' but got \''
                                         + rightSideExprType + '\'')
                     else:
-                        if node.expr.__class__.__name__ == 'ExprList':
+                        if node.expr.__class__ == AST.ExprList:
                             exprsListNode = node.expr
                             symbol.length = len(exprsListNode.exprs)
-                        elif node.expr.__class__.__name__ == 'FunctionCall' and node.expr.id == 'list':
+                        elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
                             node.expr.accept(table)
                             symbol.length = node.expr.args.exprs[0].value
                 else:
@@ -303,7 +298,7 @@ class TeslangSemanticChecker(object):
         def is_if_with_else():
             return node.else_statement is not None
 
-        if node.cond.__class__.__name__ in ('Assignment'):
+        if node.cond.__class__ == AST.Assignment:
             self.handle_error(node.pos, 'Invalid condition type in if statement')
         if hasattr(node.cond, 'accept'):
             node.cond.accept(table)
