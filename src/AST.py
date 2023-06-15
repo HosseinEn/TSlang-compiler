@@ -1,5 +1,7 @@
 from TeslangSemanticChecker import TeslangSemanticChecker
 from preParser import PreParser
+from TeslangIRGenerator import TeslangIRGenerator
+import counters
 
 class Node(object):
 
@@ -12,6 +14,12 @@ class Node(object):
             meth = getattr(PreParser(), 'visit_' + className, None)
         else:
             meth = getattr(TeslangSemanticChecker(), 'visit_' + className, None)
+        if meth!=None:
+            return meth(self, table)
+
+    def accept_ir_generation(self, table):
+        className = self.__class__.__name__
+        meth = getattr(TeslangIRGenerator(), 'visit_' + className, None)
         if meth!=None:
             return meth(self, table)
 

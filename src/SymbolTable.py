@@ -19,6 +19,10 @@ class VariableSymbol(Symbol):
         super(VariableSymbol, self).__init__(name)
         self.type = varType
         self.assigned = assigned
+        self.register = None
+
+    def set_register(self, register):
+        self.register = register
 
 class VectorSymbol(Symbol):
     def __init__(self, name, length):
