@@ -135,6 +135,16 @@ class TeslangParser(object):
         elif len(p) == 5:
             p[0] = ParametersList(parameters=p[4].parameters + [Parameter(type=p[1], id=p[2])])
 
+    def p_flist_error(self, p):
+        '''flist : error ID COMMA flist
+                 | TYPE error COMMA flist
+                 | TYPE ID COMMA error'''
+        p[0] = ParametersList(parameters=[])
+        for i in range(1, len(p)):
+            if p[i].__class__.__name__ == 'LexToken':
+                self.handle_error('function parameters list', p[i])
+                break
+
     # Rule 7
     def p_clist(self, p: yacc.YaccProduction):
         '''clist : empty
