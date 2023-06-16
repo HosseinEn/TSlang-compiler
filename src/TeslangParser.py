@@ -104,7 +104,7 @@ class TeslangParser(object):
 
     def p_for_loop(self, p: yacc.YaccProduction):
         '''for_loop : FOR LPAREN ID EQUALS expr TO expr RPAREN stmt'''
-        p[0] = ForInstruction(start_expr=p[5], end_expr=p[7], \
+        p[0] = ForInstruction(id=p[3], start_expr=p[5], end_expr=p[7], \
                               for_statement=p[9], pos=getPosition(p))
 
     def p_block(self, p: yacc.YaccProduction):

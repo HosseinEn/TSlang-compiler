@@ -21,6 +21,8 @@ class PreParser(object):
             return FunctionSymbol('vector', 'list', AST.ParametersList([AST.Parameter('int', 'size')]))
         def create_print_func():
             return FunctionSymbol('null', 'print', AST.ParametersList([AST.Parameter('str', 'string_to_print')]))
+        def create_int_print_func():
+            return FunctionSymbol('null', 'printInt', AST.ParametersList([AST.Parameter('int', 'int_to_print')]))
         def create_length_func():
             return FunctionSymbol('int', 'length', AST.ParametersList([AST.Parameter('vector', 'vector_to_count')]))
         def create_scan_func():
@@ -29,6 +31,7 @@ class PreParser(object):
         table.put(create_print_func())
         table.put(create_length_func())
         table.put(create_scan_func())
+        table.put(create_int_print_func())
 
         
 

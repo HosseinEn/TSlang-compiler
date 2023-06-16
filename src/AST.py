@@ -116,7 +116,8 @@ class WhileInstruction(Node):
         self.pos = pos
 
 class ForInstruction(Node):
-    def __init__(self, start_expr, end_expr, for_statement, pos):
+    def __init__(self, id, start_expr, end_expr, for_statement, pos):
+        self.id = id
         self.start_expr = start_expr
         self.end_expr = end_expr
         self.for_statement = for_statement

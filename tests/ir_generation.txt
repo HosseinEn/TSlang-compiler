@@ -21,11 +21,20 @@ def int main() {
 def int hello(int xxx, int y) {
     var int x = 0;
 
-    print(x);
+    printInt(x);
     var int user_inp = scan();
-    #while (x < 10) {
+
+    #while (user_inp > 5) {
     #    x = x + 1;
+    #    user_inp = user_inp - 1;
+    #    printInt(x);
     #}
+
+    var int i;
+    for (i = 5 to 10) {
+        x = x + 1;
+        printInt(x);
+    }
 
     return x;
 }

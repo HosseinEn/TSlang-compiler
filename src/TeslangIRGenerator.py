@@ -118,25 +118,28 @@ class TeslangIRGenerator(object):
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
-            if parent_table.get(node.name).redefined:
-                self.handle_error(node.pos, 'Function \'' +
-                                node.name + '\' already defined')
+            pass
+            # if parent_table.get(node.name).redefined:
+            #     self.handle_error(node.pos, 'Function \'' +
+            #                     node.name + '\' already defined')
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
-            for param in node.fmlparams.parameters:
-                varSymbol = VariableSymbol(param.type, param.id, True)
-                if not child_table.put(varSymbol):
-                    self.handle_error(
-                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+            pass
+            # for param in node.fmlparams.parameters:
+            #     varSymbol = VariableSymbol(param.type, param.id, True)
+            #     if not child_table.put(varSymbol):
+            #         self.handle_error(
+            #             node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
         try:
-            expr_type = self.extract_expr_type(node.expr, child_table)
-            if expr_type != funcSymbol.rettype:
-                if funcSymbol.rettype == 'null':
-                    self.handle_error(node.pos, 'Function \'' + node.name + '\'' + ' doesn\'t return any thing but got \'' +
-                                       expr_type + '\'')
-                else:
-                    self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
-                                  + '\' but got \'' + expr_type + '\'')
+            pass
+            # expr_type = self.extract_expr_type(node.expr, child_table)
+            # if expr_type != funcSymbol.rettype:
+            #     if funcSymbol.rettype == 'null':
+            #         self.handle_error(node.pos, 'Function \'' + node.name + '\'' + ' doesn\'t return any thing but got \'' +
+            #                            expr_type + '\'')
+            #     else:
+            #         self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
+            #                       + '\' but got \'' + expr_type + '\'')
         except ExprNotFound:
             pass
 
@@ -152,10 +155,10 @@ class TeslangIRGenerator(object):
         return_register = self.get_register()
 
         intermediate_code += '\tcall '
-        if node.id == 'print':
-            intermediate_code += 'iget' + ', '
-        elif node.id == 'scan':
+        if node.id == 'printInt':
             intermediate_code += 'iput' + ', '
+        elif node.id == 'scan':
+            intermediate_code += 'iget' + ', '
         else:
             intermediate_code += node.id + ', '
 
@@ -322,23 +325,35 @@ class TeslangIRGenerator(object):
             node.body.accept_ir_generation(child_table)
 
     def visit_WhileInstruction(self, node, table):
+        while_loop_label = self.get_label()
+        out_of_while_label = self.get_label()
+        print(while_loop_label + ':')
         if hasattr(node.cond, 'accept_ir_generation'):
-            node.cond.accept_ir_generation(table)
+            # node.cond is an expression
+            cond_register = self.handle_expr_register_allocation(node.cond, table)
+            print(f'\tjz {cond_register}, {out_of_while_label}')
         if hasattr(node.while_statement, 'accept_ir_generation'):
             node.while_statement.accept_ir_generation(table)
+            print(f'\tjmp {while_loop_label}')
+        print(out_of_while_label + ':')
 
     def visit_ForInstruction(self, node, table):
-        try:
-            if self.extract_expr_type(node.start_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid expression type in for loop start range. Expected \'int\' but got \'' 
-                                  + self.extract_expr_type(node.start_expr, table) + '\'')    
-            elif self.extract_expr_type(node.end_expr, table) != 'int':
-                self.handle_error(node.pos, 'Invalid expression type in for loop end range. Expected \'int\' but got \'' 
-                                  + self.extract_expr_type(node.end_expr, table) + '\'')    
-            if hasattr(node.for_statement, 'accept_ir_generation'):
-                node.for_statement.accept_ir_generation(table)
-        except ExprNotFound:
-            pass
+        for_loop = self.get_label()
+        out_of_for_loop = self.get_label()
+        for_loop_id_register = table.get(node.id).register
+        res_register = self.get_register()
+        start_expr = self.handle_expr_register_allocation(node.start_expr, table)
+        end_register = self.handle_expr_register_allocation(node.end_expr, table)
+        print(f'\tmov {for_loop_id_register}, {start_expr}')
+        print(for_loop + ':')
+        print(f'\tcmp< {res_register}, {for_loop_id_register}, {end_register}')
+        print(f'\tjz {res_register}, {out_of_for_loop}')
+        self.handle_expr_register_allocation(node.end_expr, table)
+        if hasattr(node.for_statement, 'accept_ir_generation'):
+            node.for_statement.accept_ir_generation(table)
+        print(f'\tadd {for_loop_id_register}, {for_loop_id_register}, 1')
+        print(f'\tjmp {for_loop}')
+        print(out_of_for_loop + ':')
 
 
     def visit_OperationOnList(self, node, table):
