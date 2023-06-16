@@ -47,13 +47,19 @@ class PreParser(object):
             table = node.prog.accept(table, pre_parse=True)
         return table
 
-    def visit_FunctionDef(self, node, parent_table: SymbolTable):
+    def handle_function_def(self, node, parent_table):
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
             parent_table.mark_as_defined(node.name)
         child_table = SymbolTable(parent_table, funcSymbol)
-        if node.body:
-            node.body.accept(child_table, pre_parse=True)
+        if hasattr(node, 'body'):
+            if node.body:
+                node.body.accept(child_table, pre_parse=True)
+
+    def visit_FunctionDef(self, node, parent_table: SymbolTable):
+        self.handle_function_def(node, parent_table)
+    def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
+        self.handle_function_def(node, parent_table)
 
     def visit_Body(self, node, table):
         if node.statement:

@@ -97,13 +97,9 @@ class TeslangIRGenerator(object):
 
     def visit_FunctionDef(self, node, parent_table: SymbolTable):
         print('proc ' + node.name + ':')
-        intermediate_code = 'proc ' + node.name + ':\n'
         counters.register_counter = 0
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
-        if not parent_table.put(funcSymbol):
-            if parent_table.get(node.name).redefined:
-                self.handle_error(node.pos, 'Function \'' +
-                                node.name + '\' already defined')
+        parent_table.put(funcSymbol)
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             node.fmlparams.parameters.reverse()
@@ -113,35 +109,23 @@ class TeslangIRGenerator(object):
                 child_table.put(varSymbol)
         if node.body:
             node.body.accept_ir_generation(child_table)
-        return intermediate_code
+
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
+        print('proc ' + node.name + ':')
+        counters.register_counter = 0
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
-        if not parent_table.put(funcSymbol):
-            pass
-            # if parent_table.get(node.name).redefined:
-            #     self.handle_error(node.pos, 'Function \'' +
-            #                     node.name + '\' already defined')
+        parent_table.put(funcSymbol)
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
-            pass
-            # for param in node.fmlparams.parameters:
-            #     varSymbol = VariableSymbol(param.type, param.id, True)
-            #     if not child_table.put(varSymbol):
-            #         self.handle_error(
-            #             node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
-        try:
-            pass
-            # expr_type = self.extract_expr_type(node.expr, child_table)
-            # if expr_type != funcSymbol.rettype:
-            #     if funcSymbol.rettype == 'null':
-            #         self.handle_error(node.pos, 'Function \'' + node.name + '\'' + ' doesn\'t return any thing but got \'' +
-            #                            expr_type + '\'')
-            #     else:
-            #         self.handle_error(node.pos, 'Function \'' + node.name + '\' returns \'' + funcSymbol.rettype
-            #                       + '\' but got \'' + expr_type + '\'')
-        except ExprNotFound:
-            pass
+            node.fmlparams.parameters.reverse()
+            for param in node.fmlparams.parameters:
+                varSymbol = VariableSymbol(param.type, param.id, True)
+                varSymbol.register = self.get_register()
+                child_table.put(varSymbol)
+        return_reg = self.handle_expr_register_allocation(node.expr, child_table)
+        return return_reg
+
 
     def visit_Body(self, node, table):
         if node.statement:

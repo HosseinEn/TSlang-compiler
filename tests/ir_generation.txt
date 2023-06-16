@@ -15,6 +15,8 @@ def int main() {
     #z = 100;
     z = hello(x, y);
 
+    another_func(x, y, z);
+
     return x + y + z;
 }
 
@@ -42,5 +44,12 @@ def int hello(int xxx, int y) {
 
     return x;
 }
+
+def null another_func(int x, int y, int z) {
+    var int lskfd = sum3(x, y, z);
+    printInt(lskfd);
+}
+
+def int sum3(int x1, int x2, int x3) return x1 + x2 + x3;
 
 
