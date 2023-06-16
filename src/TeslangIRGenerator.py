@@ -143,10 +143,9 @@ class TeslangIRGenerator(object):
     def visit_Body(self, node, table):
         if node.statement:
             if hasattr(node.statement, 'accept_ir_generation'):
-                code = node.statement.accept_ir_generation(table)
+                node.statement.accept_ir_generation(table)
         if node.body:
-            code = node.body.accept_ir_generation(table)
-        return code
+            node.body.accept_ir_generation(table)
 
     def visit_FunctionCall(self, node, table):
         intermediate_code = ''

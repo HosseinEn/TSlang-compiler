@@ -1,6 +1,7 @@
 from SymbolTable import *
 import AST
 from colors import bcolors
+import control_flags
 
 
 class ExprNotFound(Exception):
@@ -69,7 +70,11 @@ class TeslangSemanticChecker(object):
 
 
     def handle_error(self, pos, msg):
+        control_flags.semantic_failed = True
         print(bcolors.FAIL + 'Semantic error at line ' + str(pos.line) + bcolors.ENDC + ': ' + msg)
+
+    def handle_warning(self, pos, msg):
+        print(bcolors.WARNING + 'Warning at line ' + str(pos.line) + bcolors.ENDC + ': ' + msg)
 
     def visit_Program(self, node, table):
         if table is None:

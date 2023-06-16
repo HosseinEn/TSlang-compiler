@@ -10,6 +10,9 @@ import control_flags
 def up_and_run_compiler():
     counters.init()
     control_flags.init()
+    control_flags.lexer_failed = False
+    control_flags.parser_failed = False
+    control_flags.semantic_failed = False
     def start(pre_parse, table=None, ir_generation=False):
         tParser = TeslangParser(pre_parse=pre_parse)
         parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
@@ -25,7 +28,11 @@ def up_and_run_compiler():
         return table
     table = start(pre_parse=True)
     table = start(pre_parse=False, table=table)
-    table = start(pre_parse=False, ir_generation=True, table=table)
+    compile_failed = control_flags.lexer_failed or control_flags.parser_failed or control_flags.semantic_failed
+    if not compile_failed:
+        start(pre_parse=False, ir_generation=True, table=table)
+    else:
+        print("\n\nCompilation failed and IR generation was not attempted.")
 
 
 

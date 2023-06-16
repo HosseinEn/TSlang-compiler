@@ -1,6 +1,6 @@
 from ply.lex import lex
 import re
-
+import control_flags
 
 class TeslangLexer(object):
     def find_token_column(self, token):
@@ -193,5 +193,6 @@ class TeslangLexer(object):
 
     # Error handler for illegal characters
     def t_error(self, t):
+        control_flags.lexer_failed = True
         print(f'Illegal character {t.value[0]!r} at line {t.lineno}')
         t.lexer.skip(1)

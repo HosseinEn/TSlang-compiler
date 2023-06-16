@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from TeslangLexer import *
 from AST import *
 from colors import bcolors
-
+import control_flags
 
 class FilePosition(object):
     def __init__(self, line):
@@ -240,6 +240,7 @@ class TeslangParser(object):
                   bcolors.ENDC + f' in {where} with token {p}')
 
     def p_error(self, p):
+        control_flags.parser_failed = True
         if p is not None:
             pass
         else:

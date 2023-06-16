@@ -3,15 +3,17 @@ def int main() {
     var int y = 110; # r1
     var int z = 110 + y; # r2
 
-    #if (x < y) {
-    #    x = 20;
-    #}
-    #else {
-    #    y = 30;
-    #}
+    x = 50;
+
+    if (x < y) {
+        x = 20;
+    }
+    else {
+        y = 30;
+    }
 
     #z = 100;
-    z = hello(x, y); # call hello, r2, r0, r1
+    z = hello(x, y);
 
     return x + y + z;
 }
