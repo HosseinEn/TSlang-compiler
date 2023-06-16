@@ -24,11 +24,15 @@ def int hello(int xxx, int y) {
     printInt(x);
     var int user_inp = scan();
 
-    #while (user_inp > 5) {
-    #    x = x + 1;
-    #    user_inp = user_inp - 1;
-    #    printInt(x);
-    #}
+    while (user_inp > 5) {
+        x = x + 1;
+        user_inp = user_inp - 1;
+        printInt(x);
+    }
+
+    xxx = 1000;
+    xxx = xxx + 1;
+    y = xxx;
 
     var int i;
     for (i = 5 to 10) {

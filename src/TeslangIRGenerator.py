@@ -106,11 +106,11 @@ class TeslangIRGenerator(object):
                                 node.name + '\' already defined')
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
+            node.fmlparams.parameters.reverse()
             for param in node.fmlparams.parameters:
                 varSymbol = VariableSymbol(param.type, param.id, True)
-                if not child_table.put(varSymbol):
-                    self.handle_error(
-                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+                varSymbol.register = self.get_register()
+                child_table.put(varSymbol)
         if node.body:
             node.body.accept_ir_generation(child_table)
         return intermediate_code
@@ -162,7 +162,7 @@ class TeslangIRGenerator(object):
         else:
             intermediate_code += node.id + ', '
 
-        intermediate_code += ' ' + return_register
+        intermediate_code += return_register
 
         node.args.exprs.reverse()
         for i, expr in enumerate(node.args.exprs):
@@ -181,6 +181,7 @@ class TeslangIRGenerator(object):
             '<': '\tcmp<',
             '>=': '\tcmp>=',
             '<=': '\tcmp<=',
+            '==': '\tcmp==',
             '*': '\tmul',
             '/': '\tdiv',
             '%': '\tmod',
