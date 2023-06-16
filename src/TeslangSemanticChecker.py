@@ -84,36 +84,30 @@ class TeslangSemanticChecker(object):
             table = node.prog.accept(table)
         return table
 
-    def visit_FunctionDef(self, node, parent_table: SymbolTable):
-        funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
+    def check_function_def_errors(self, node, parent_table, funcSymbol):
         if not parent_table.put(funcSymbol):
             if parent_table.get(node.name).redefined:
                 self.handle_error(node.pos, 'Function \'' +
-                                node.name + '\' already defined')
+                                  node.name + '\' already defined')
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             for param in node.fmlparams.parameters:
                 varSymbol = VariableSymbol(param.type, param.id, True)
                 if not child_table.put(varSymbol):
                     self.handle_error(
-                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+                        node.pos,
+                        'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+        return child_table
+    def visit_FunctionDef(self, node, parent_table: SymbolTable):
+        funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
+        child_table = self.check_function_def_errors(node, parent_table, funcSymbol)
         if node.body:
             node.body.accept(child_table)
         child_table.show_unused_warning()
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
-        if not parent_table.put(funcSymbol):
-            if parent_table.get(node.name).redefined:
-                self.handle_error(node.pos, 'Function \'' +
-                                node.name + '\' already defined')
-        child_table = SymbolTable(parent_table, funcSymbol)
-        if node.fmlparams:
-            for param in node.fmlparams.parameters:
-                varSymbol = VariableSymbol(param.type, param.id, True)
-                if not child_table.put(varSymbol):
-                    self.handle_error(
-                        node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
+        child_table = self.check_function_def_errors(node, parent_table, funcSymbol)
         try:
             expr_type = self.extract_expr_type(node.expr, child_table)
             if expr_type != funcSymbol.rettype:
