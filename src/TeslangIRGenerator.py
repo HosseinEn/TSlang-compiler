@@ -151,7 +151,17 @@ class TeslangIRGenerator(object):
     def visit_FunctionCall(self, node, table):
         intermediate_code = ''
         return_register = self.get_register()
-        intermediate_code += '\tcall ' + node.id + ', ' + return_register
+
+        intermediate_code += '\tcall '
+        if node.id == 'print':
+            intermediate_code += 'iget' + ', '
+        elif node.id == 'scan':
+            intermediate_code += 'iput' + ', '
+        else:
+            intermediate_code += node.id + ', '
+
+        intermediate_code += ' ' + return_register
+
         node.args.exprs.reverse()
         for i, expr in enumerate(node.args.exprs):
             try:

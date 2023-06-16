@@ -4,10 +4,12 @@ import sys
 import ply.yacc as yacc
 from preParser import PreParser
 import counters
+import control_flags
 
 
 def up_and_run_compiler():
     counters.init()
+    control_flags.init()
     def start(pre_parse, table=None, ir_generation=False):
         tParser = TeslangParser(pre_parse=pre_parse)
         parser = yacc.yacc(module=tParser, debug=True, write_tables=True)
