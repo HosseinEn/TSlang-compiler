@@ -1,0 +1,24 @@
+def int main() {
+    var int x;
+    var int y = 110;
+    var int z = 110 + y;
+
+    if (x < y) {
+        x = 20;
+    }
+    else {
+        y = 30;
+    }
+
+    z = 100;
+    hello(x, y);
+
+    return x + y + z;
+}
+
+def int hello(int xxx, int y) {
+    var int x = 0;
+    return x;
+}
+
+

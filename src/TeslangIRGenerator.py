@@ -70,18 +70,35 @@ class TeslangIRGenerator(object):
         return 'unknown'
 
 
+    def handle_expr_register_allocation(self, expr, table) -> str:
+        expr_register = None
+        if hasattr(expr, 'accept_ir_generation'):
+            expr_register = expr.accept_ir_generation(table)
+        elif expr.__class__.__name__ == 'LexToken':
+            if expr.type == 'NUMBER':
+                expr_register = str(expr.value)
+            elif expr.type == 'ID':
+                exprSymbol = table.get(expr.value)
+                expr_register = exprSymbol.register
+        return expr_register
+
+
     def handle_error(self, pos, msg):
         print(bcolors.FAIL + 'Semantic error at line ' + str(pos.line) + bcolors.ENDC + ': ' + msg)
 
     def visit_Program(self, node, table):
         if table is None:
             table = SymbolTable(None, None)
-        node.func.accept_ir_generation(table)
+        code = node.func.accept_ir_generation(table)
         if node.prog:
-            table = node.prog.accept_ir_generation(table)
-        return table
+            code = node.prog.accept_ir_generation(table)
+        # print(code)
+        return code
 
     def visit_FunctionDef(self, node, parent_table: SymbolTable):
+        print('proc ' + node.name + ':')
+        intermediate_code = 'proc ' + node.name + ':\n'
+        counters.register_counter = 0
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         if not parent_table.put(funcSymbol):
             if parent_table.get(node.name).redefined:
@@ -96,6 +113,7 @@ class TeslangIRGenerator(object):
                         node.pos, 'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
         if node.body:
             node.body.accept_ir_generation(child_table)
+        return intermediate_code
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
@@ -125,49 +143,49 @@ class TeslangIRGenerator(object):
     def visit_Body(self, node, table):
         if node.statement:
             if hasattr(node.statement, 'accept_ir_generation'):
-                node.statement.accept_ir_generation(table)
+                code = node.statement.accept_ir_generation(table)
         if node.body:
-            node.body.accept_ir_generation(table)
+            code = node.body.accept_ir_generation(table)
+        return code
 
     def visit_FunctionCall(self, node, table):
-        intermediate_code = None
-
-        # if node.id == 'print':
-        #     intermediate_code = '\tcall iput
-
+        intermediate_code = ''
+        intermediate_code += '\tcall ' + node.id
         # Searching for the called function in the symbol table
-        symbol_table_search_res = table.get(node.id)
 
-        funcSymbol = symbol_table_search_res
-        params_count = len(funcSymbol.params.parameters) if funcSymbol.params else 0
+        node.args.exprs.reverse()
         for i, expr in enumerate(node.args.exprs):
             try:
-                print(expr)
-                # param = funcSymbol.params.parameters[i]
-                # arg_type = self.extract_expr_type(expr, table)
+                expr_register = self.handle_expr_register_allocation(expr, table)
+                intermediate_code += ', ' + expr_register
             except ExprNotFound:
                 pass
-            
+        print(intermediate_code)
 
     def visit_BinExpr(self, node, table):
-        try: 
-            leftExprType = self.extract_expr_type(node.left, table)
-            rightExprType = self.extract_expr_type(node.right, table)
+        intermediate_code = ''
+        op_intermediate_equivalent = {
+            '>': '\tcmp>',
+            '<': '\tcmp<',
+            '>=': '\tcmp>=',
+            '<=': '\tcmp<=',
+            '*': '\tmul',
+            '/': '\tdiv',
+            '%': '\tmod',
+            '-': '\tsub',
+            '+': '\tadd',
+        }
+        try:
+            result_register = self.get_register()
+            intermediate_code += op_intermediate_equivalent[node.op] + ' ' + result_register + ', '
 
-            if leftExprType == 'vector' or rightExprType == 'vector':
-                self.handle_error(node.pos, 'Vector operations not supported')
+            left_expr = self.handle_expr_register_allocation(node.left, table)
+            intermediate_code += left_expr + ', '
+            right_expr = self.handle_expr_register_allocation(node.right, table)
+            intermediate_code += right_expr
 
-            if node.op in ('*', '/', '%', '-'):
-                both_are_int = (leftExprType == 'int' and rightExprType == 'int')
-                if not both_are_int:
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. *, /, %, - can only be used with numbers')
-            elif node.op == '+':
-                both_are_int = (leftExprType == 'int' and rightExprType == 'int')
-                both_are_str = (leftExprType == 'str' and rightExprType == 'str')
-                if not both_are_int and not both_are_str:
-                    self.handle_error(node.pos, 'Type mismatch in binary expression. + can only be used with numbers or strings')
-            else: 
-                pass
+            print(intermediate_code)
+            return result_register
         except ExprNotFound:
             pass
 
@@ -200,45 +218,35 @@ class TeslangIRGenerator(object):
             if node.expr is None:
                 intermediate_code += '\tmov ' + register + ', 0'
             else:
-                # intermediate_code += self.extract_expr_type(node.expr, table)
-                intermediate_code += '\tmov ' + register + ', ' + str(node.expr.value) if self.extract_expr_type(node.expr, table) == 'int' else 'NOIMPLEMENTATION'
+                expr_register = self.handle_expr_register_allocation(node.expr, table)
+                intermediate_code += '\tmov ' + register + ', ' + expr_register
+
         print(intermediate_code)
         table.put(varSymbol)
         return intermediate_code
 
 
     def visit_Assignment(self, node, table: SymbolTable):
+        intermediate_code = ''
         symbol = table.get(node.id)
-        if symbol is None:
-            self.handle_error(node.pos, 'Variable \'' + node.id + '\' not defined but used in assignment in function \'' 
-                              + table.function.name + '\'')
-        else:
-            try:
-                symbol.mark_as_used()
-                if isinstance(symbol, VariableSymbol):
-                    expected_type = symbol.type
-                    given_type = self.extract_expr_type(node.expr, table)
-                    if given_type != expected_type:
-                        self.handle_error(node.pos, f'Type mismatch in assignment. Expected \'' + expected_type
-                                        + '\' but got \'' + given_type + '\'')
-                    symbol.assigned = True
-                elif isinstance(symbol, VectorSymbol):
-                    rightSideExprType = self.extract_expr_type(node.expr, table)
-                    if rightSideExprType != 'vector':
-                        self.handle_error(node.pos, 'Type mismatch in vector assignment. Expected \'vector\' but got \''
-                                        + rightSideExprType + '\'')
-                    else:
-                        if node.expr.__class__ == AST.ExprList:
-                            exprsListNode = node.expr
-                            symbol.length = len(exprsListNode.exprs)
-                        elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
-                            node.expr.accept_ir_generation(table)
-                            symbol.length = node.expr.args.exprs[0].value
-                else:
-                    self.handle_error(node.pos, 'Can not use ' 
-                                      + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in assignment')
-            except ExprNotFound:
-                pass
+        if isinstance(symbol, VariableSymbol):
+            intermediate_code += '\tmov ' + symbol.register + ', '
+            expr_register = self.handle_expr_register_allocation(node.expr, table)
+            intermediate_code += expr_register
+        elif isinstance(symbol, VectorSymbol):
+            pass
+            # rightSideExprType = self.extract_expr_type(node.expr, table)
+            # if rightSideExprType != 'vector':
+            #     self.handle_error(node.pos, 'Type mismatch in vector assignment. Expected \'vector\' but got \''
+            #                     + rightSideExprType + '\'')
+            # else:
+            #     if node.expr.__class__ == AST.ExprList:
+            #         exprsListNode = node.expr
+            #         symbol.length = len(exprsListNode.exprs)
+            #     elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
+            #         node.expr.accept_ir_generation(table)
+            #         symbol.length = node.expr.args.exprs[0].value
+        print(intermediate_code)
 
     def visit_VectorAssignment(self, node, table):
         try:
@@ -268,29 +276,40 @@ class TeslangIRGenerator(object):
             pass
 
     def visit_ReturnInstruction(self, node, table):
-        try:
-            expected_type = table.function.rettype
-            given_return_type = self.extract_expr_type(node.expr, table)
-            if expected_type != given_return_type:
-                self.handle_error(node.pos, f'Type mismatch in return statement. Expected \'' + expected_type
-                                + '\' but got \'' + given_return_type + '\'')
-        except ExprNotFound:
-            pass
+        expr_register = self.handle_expr_register_allocation(node.expr, table)
+        intermediate_code = '\tmov r0, ' + expr_register
+        print(intermediate_code)
+        print('\tret')
+
 
 
     def visit_IfOrIfElseInstruction(self, node, table):
+        intermediate_code = ''
         def is_if_with_else():
             return node.else_statement is not None
 
-        if node.cond.__class__ == AST.Assignment:
-            self.handle_error(node.pos, 'Invalid condition type in if statement')
+        after_else_label = self.get_label()
+        else_label  = self.get_label()
         if hasattr(node.cond, 'accept_ir_generation'):
-            node.cond.accept_ir_generation(table)
-        if hasattr(node.if_statement, 'accept_ir_generation'):
-            node.if_statement.accept_ir_generation(table)
+            # node.cond is an expression
+            result_register = self.handle_expr_register_allocation(node.cond, table)
+            intermediate_code += '\tjz ' + result_register + ', '
+            intermediate_code += else_label if is_if_with_else() else after_else_label
+            print(intermediate_code)
         if is_if_with_else():
+            if hasattr(node.if_statement, 'accept_ir_generation'):
+                node.if_statement.accept_ir_generation(table)
+                print('\tjmp ' + after_else_label)
+
             if hasattr(node.else_statement, 'accept_ir_generation'):
+                print(else_label + ':')
                 node.else_statement.accept_ir_generation(table)
+                print(after_else_label + ':')
+        else:
+            if hasattr(node.if_statement, 'accept_ir_generation'):
+                ''' exec the if statement '''
+                node.if_statement.accept_ir_generation(table)
+                print(after_else_label + ':')
 
     def visit_Block(self, node, table):
         child_table = SymbolTable(parent=table, function=table.function)
