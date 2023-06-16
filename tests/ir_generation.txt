@@ -1,23 +1,30 @@
 def int main() {
-    var int x;
-    var int y = 110;
-    var int z = 110 + y;
+    var int x; # r0
+    var int y = 110; # r1
+    var int z = 110 + y; # r2
 
-    if (x < y) {
-        x = 20;
-    }
-    else {
-        y = 30;
-    }
+    #if (x < y) {
+    #    x = 20;
+    #}
+    #else {
+    #    y = 30;
+    #}
 
-    z = 100;
-    hello(x, y);
+    #z = 100;
+    z = hello(x, y); # call hello, r2, r0, r1
 
     return x + y + z;
 }
 
 def int hello(int xxx, int y) {
     var int x = 0;
+
+    print(x);
+    var int user_inp = scan();
+    #while (x < 10) {
+    #    x = x + 1;
+    #}
+
     return x;
 }
 

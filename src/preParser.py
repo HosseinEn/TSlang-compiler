@@ -23,10 +23,13 @@ class PreParser(object):
             return FunctionSymbol('null', 'print', AST.ParametersList([AST.Parameter('str', 'string_to_print')]))
         def create_length_func():
             return FunctionSymbol('int', 'length', AST.ParametersList([AST.Parameter('vector', 'vector_to_count')]))
+        def create_scan_func():
+            return FunctionSymbol('int', 'scan', AST.ParametersList([]))
         table.put(create_list_func())
         table.put(create_print_func())
         table.put(create_length_func())
-        
+        table.put(create_scan_func())
+
         
 
     def handle_error(self, pos, msg):

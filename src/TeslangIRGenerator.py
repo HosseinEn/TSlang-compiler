@@ -150,9 +150,8 @@ class TeslangIRGenerator(object):
 
     def visit_FunctionCall(self, node, table):
         intermediate_code = ''
-        intermediate_code += '\tcall ' + node.id
-        # Searching for the called function in the symbol table
-
+        return_register = self.get_register()
+        intermediate_code += '\tcall ' + node.id + ', ' + return_register
         node.args.exprs.reverse()
         for i, expr in enumerate(node.args.exprs):
             try:
@@ -161,6 +160,7 @@ class TeslangIRGenerator(object):
             except ExprNotFound:
                 pass
         print(intermediate_code)
+        return return_register
 
     def visit_BinExpr(self, node, table):
         intermediate_code = ''
@@ -175,19 +175,15 @@ class TeslangIRGenerator(object):
             '-': '\tsub',
             '+': '\tadd',
         }
-        try:
-            result_register = self.get_register()
-            intermediate_code += op_intermediate_equivalent[node.op] + ' ' + result_register + ', '
 
-            left_expr = self.handle_expr_register_allocation(node.left, table)
-            intermediate_code += left_expr + ', '
-            right_expr = self.handle_expr_register_allocation(node.right, table)
-            intermediate_code += right_expr
-
-            print(intermediate_code)
-            return result_register
-        except ExprNotFound:
-            pass
+        result_register = self.get_register()
+        intermediate_code += op_intermediate_equivalent[node.op] + ' ' + result_register + ', '
+        left_expr = self.handle_expr_register_allocation(node.left, table)
+        intermediate_code += left_expr + ', '
+        right_expr = self.handle_expr_register_allocation(node.right, table)
+        intermediate_code += right_expr
+        print(intermediate_code)
+        return result_register
 
  
     
