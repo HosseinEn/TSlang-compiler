@@ -152,7 +152,7 @@ class TeslangIRGenerator(object):
             return_register = self.handle_expr_register_allocation(node.args.exprs[0], table)
         else:
             return_register = self.get_register()
-
+        breakpoint()
         intermediate_code += return_register
 
         for i, expr in enumerate(node.args.exprs[1:]):

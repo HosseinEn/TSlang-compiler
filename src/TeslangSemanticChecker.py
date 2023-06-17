@@ -92,8 +92,12 @@ class TeslangSemanticChecker(object):
         child_table = SymbolTable(parent_table, funcSymbol)
         if node.fmlparams:
             for param in node.fmlparams.parameters:
-                varSymbol = VariableSymbol(param.type, param.id, True)
-                if not child_table.put(varSymbol):
+                symbol = None
+                if param.type == 'vector':
+                    symbol = VectorSymbol(param.id, 1000) # TODO this is considered as a default size
+                else:
+                    symbol = VariableSymbol(param.type, param.id, True)
+                if not child_table.put(symbol):
                     self.handle_error(
                         node.pos,
                         'Parameter \'' + param.id + '\' already defined' + ' in function \'' + node.name + '\'')
@@ -187,19 +191,23 @@ class TeslangSemanticChecker(object):
         varSymbol = None
         if node.type == 'vector':
             try:
-                rightSideExprType = self.extract_expr_type(node.expr, table)
-                if rightSideExprType != 'vector':
-                    self.handle_error(node.pos, 'Type mismatch in vector declaration. Expected \'vector\' but got \''
-                                    + rightSideExprType + '\'')
-                    # Handling error by passing vector length as zero to show more errors
-                    varSymbol = VectorSymbol(node.id, 0)
+                if node.expr:
+                    rightSideExprType = self.extract_expr_type(node.expr, table)
+                    if rightSideExprType != 'vector':
+                        self.handle_error(node.pos, 'Type mismatch in vector declaration. Expected \'vector\' but got \''
+                                        + rightSideExprType + '\'')
+                        # Handling error by passing vector length as zero to show more errors
+                        varSymbol = VectorSymbol(node.id, 0)
+                    else:
+                        if node.expr.__class__ == AST.ExprList:
+                            exprsListNode = node.expr
+                            varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
+                        elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
+                            node.expr.accept(table)
+                            varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)
                 else:
-                    if node.expr.__class__ == AST.ExprList:
-                        exprsListNode = node.expr
-                        varSymbol = VectorSymbol(node.id, len(exprsListNode.exprs))
-                    elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
-                        node.expr.accept(table)
-                        varSymbol = VectorSymbol(node.id, node.expr.args.exprs[0].value)                        
+                    self.handle_error(node.pos, 'Vector declaration without initialization')
+                    varSymbol = VectorSymbol(node.id, 0)
             except ExprNotFound:
                 pass
         else:
@@ -272,7 +280,12 @@ class TeslangSemanticChecker(object):
                         + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  
 
                 else:
-                    if symbol.length <= node.index_expr.value or node.index_expr.value < 0:
+                    if node.index_expr.__class__.__name__ == 'LexToken' and node.index_expr.type == 'int':
+                        index_expr_value = node.index_expr.value
+                    else:
+                        index_expr_value = 1000 # TODO default considered index for identifier - should be handled better
+                    print(index_expr_value)
+                    if symbol.length <= index_expr_value or index_expr_value < 0:
                         self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
                                           + node.id + '\' can hold only ' + str(symbol.length) + ' values')
                     rightSideExprType = self.extract_expr_type(node.expr, table)

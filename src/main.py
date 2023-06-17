@@ -5,6 +5,9 @@ import ply.yacc as yacc
 from preParser import PreParser
 import counters
 import control_flags
+import os
+from colors import bcolors
+
 
 
 def up_and_run_compiler():
@@ -44,7 +47,15 @@ logging.basicConfig(
 )
 log = logging.getLogger()
 
-data = open(('../tests/' +sys.argv[1]) if len(sys.argv) == 2 else '../tests/ir_generation.txt', 'r').read()
+print("Select one of the test files listed below:")
+files = [f for f in os.listdir('../tests') if os.path.isfile(os.path.join('../tests', f))]
+for i, f in enumerate(files):
+    print(bcolors.OKGREEN, f'[{i}]', bcolors.ENDC, f)
+
+chosen_file_index = int(input("\nEnter file index:"))
+data = open('../tests/' + files[chosen_file_index], 'r').read()
+
+# data = open(('../tests/' + sys.argv[1]) if len(sys.argv) == 2 else '../tests/ir_generation.txt', 'r').read()
 
 up_and_run_compiler()
 
