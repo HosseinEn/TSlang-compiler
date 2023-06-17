@@ -1,6 +1,6 @@
 from colors import bcolors
 
-BUILTIN_FUNCS = ['main', 'print', 'length', 'list']
+BUILTIN_FUNCS = ['main', 'print', 'length', 'list', 'printInt']
 
 class Symbol(object):
     def __init__(self, name):
