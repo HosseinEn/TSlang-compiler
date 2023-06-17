@@ -15,8 +15,14 @@ def int main() {
     #z = 100;
     z = hello(x, y);
 
-    another_func(x, y, z);
+    #another_func(x, y, z);
 
+    sum_three_for_test(x, y, z);
+
+    return x + y + z;
+}
+
+def int sum_three_for_test(int x, int y, int z) {
     return x + y + z;
 }
 
@@ -45,11 +51,24 @@ def int hello(int xxx, int y) {
     return x;
 }
 
-def null another_func(int x, int y, int z) {
-    var int lskfd = sum3(x, y, z);
-    printInt(lskfd);
-}
-
-def int sum3(int x1, int x2, int x3) return x1 + x2 + x3;
+#def null another_func(int x, int y, int z) {
+#    var int lskfd = sum3(x, y, z);
+#    printInt(lskfd);
+#    var int fds = sum2(x, y);
+#    printInt(fds);
+#    returnzero();
+#}
+#
+#def int sum2(int x1, int x2) {
+#    return x1 + x2;
+#}
+#
+#def int returnzero() {
+#    return 0;
+#}
+#
+#def int sum3(int x1, int x2, int x3) {
+#    return x1 + x2 + x3;
+#}
 
 
