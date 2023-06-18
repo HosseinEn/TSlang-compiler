@@ -59,3 +59,4 @@ data = open('../tests/' + files[chosen_file_index], 'r').read()
 
 up_and_run_compiler()
 
+print()

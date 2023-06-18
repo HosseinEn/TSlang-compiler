@@ -284,7 +284,6 @@ class TeslangSemanticChecker(object):
                         index_expr_value = node.index_expr.value
                     else:
                         index_expr_value = 1000 # TODO default considered index for identifier - should be handled better
-                    print(index_expr_value)
                     if symbol.length <= index_expr_value or index_expr_value < 0:
                         self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
                                           + node.id + '\' can hold only ' + str(symbol.length) + ' values')

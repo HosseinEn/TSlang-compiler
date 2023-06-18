@@ -76,7 +76,9 @@ class TeslangIRGenerator(object):
             expr_register = expr.accept_ir_generation(table)
         elif expr.__class__.__name__ == 'LexToken':
             if expr.type == 'NUMBER':
-                expr_register = str(expr.value)
+                expr_register_val = str(expr.value)
+                expr_register = self.get_register()
+                print('\tmov ' + expr_register + ', ' + expr_register_val)
             elif expr.type == 'ID':
                 exprSymbol = table.get(expr.value)
                 expr_register = exprSymbol.register
@@ -96,7 +98,7 @@ class TeslangIRGenerator(object):
         return code
 
     def visit_FunctionDef(self, node, parent_table: SymbolTable):
-        print('proc ' + node.name + ':')
+        print('proc ' + node.name)
         counters.register_counter = 0
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         parent_table.put(funcSymbol)
@@ -112,7 +114,7 @@ class TeslangIRGenerator(object):
 
 
     def visit_BodyLessFunctionDef(self, node, parent_table: SymbolTable):
-        print('proc ' + node.name + ':')
+        print('proc ' + node.name)
         counters.register_counter = 0
         funcSymbol = FunctionSymbol(node.rettype, node.name, node.fmlparams)
         parent_table.put(funcSymbol)
@@ -152,7 +154,6 @@ class TeslangIRGenerator(object):
             return_register = self.handle_expr_register_allocation(node.args.exprs[0], table)
         else:
             return_register = self.get_register()
-        breakpoint()
         intermediate_code += return_register
 
         for i, expr in enumerate(node.args.exprs[1:]):
@@ -340,7 +341,9 @@ class TeslangIRGenerator(object):
         self.handle_expr_register_allocation(node.end_expr, table)
         if hasattr(node.for_statement, 'accept_ir_generation'):
             node.for_statement.accept_ir_generation(table)
-        print(f'\tadd {for_loop_id_register}, {for_loop_id_register}, 1')
+        increment_reg = self.get_register()
+        print(f'\tmov {increment_reg}, 1')
+        print(f'\tadd {for_loop_id_register}, {for_loop_id_register}, {increment_reg}')
         print(f'\tjmp {for_loop}')
         print(out_of_for_loop + ':')
 
