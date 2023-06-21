@@ -1,0 +1,17 @@
+def int main() {
+    var int a = scan();
+    var int b = scan();
+    var int c = scan();
+
+    printInt(adder(c, b, a));
+
+}
+
+def int adder(int a, int b, int c) {
+    var int result = a + b + c;
+    return result;
+}
+
+
+
+

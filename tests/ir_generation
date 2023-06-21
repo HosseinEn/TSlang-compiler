@@ -1,0 +1,87 @@
+def int main() {
+    var int x; # r0
+    var int y = 50; # r1
+    var int z = 110 + y; # r2
+
+    if (y < z) {
+        x = 100;
+        printInt(x);
+    }
+    else {
+        x = 1000;
+        printInt(x);
+    }
+
+    printInt(sum_three_for_test(x, y, z));
+
+    var int i;
+    for (i = 5 to 10) {
+        printInt(x);
+    }
+
+    while (y < 58) {
+        printInt(y);
+        y = y + 1;
+    }
+
+
+
+    #z = 100;
+    #z = hello(x, y);
+
+    #another_func(x, y, z);
+
+
+    return 0;
+}
+
+def int sum_three_for_test(int x, int y, int z) {
+    return x + y + z;
+}
+
+def int hello(int xxx, int y) {
+    var int x = 0;
+
+    printInt(x);
+    var int user_inp = scan();
+
+    while (user_inp > 5) {
+        x = x + 1;
+        user_inp = user_inp - 1;
+        printInt(x);
+    }
+
+    xxx = 1000;
+    xxx = xxx + 1;
+    y = xxx;
+
+    var int i;
+    for (i = 5 to 10) {
+        x = x + 1;
+        printInt(x);
+    }
+
+    return x;
+}
+
+#def null another_func(int x, int y, int z) {
+#    var int lskfd = sum3(x, y, z);
+#    printInt(lskfd);
+#    var int fds = sum2(x, y);
+#    printInt(fds);
+#    returnzero();
+#}
+#
+#def int sum2(int x1, int x2) {
+#    return x1 + x2;
+#}
+#
+#def int returnzero() {
+#    return 0;
+#}
+#
+#def int sum3(int x1, int x2, int x3) {
+#    return x1 + x2 + x3;
+#}
+
+
