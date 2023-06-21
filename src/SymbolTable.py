@@ -1,6 +1,6 @@
 from colors import bcolors
 
-BUILTIN_FUNCS = ['main', 'print', 'length', 'list', 'printInt']
+BUILTIN_FUNCS = ['main', 'print', 'length', 'list', 'printInt', 'scan']
 
 class Symbol(object):
     def __init__(self, name):
@@ -80,8 +80,14 @@ class SymbolTable(object):
     def show_unused_warning(self):
         for key in self.table:
             if not self.table[key].used and self.table[key].name not in BUILTIN_FUNCS:
-                symbolType = 'variable' if isinstance(self.table[key], VariableSymbol) else 'function'
-                if isinstance(self.table[key], VariableSymbol) and self.function:
+                symbolType = ''
+                if isinstance(self.table[key], VariableSymbol):
+                    symbolType = 'variable'
+                elif isinstance(self.table[key], FunctionSymbol):
+                    symbolType = 'function'
+                elif isinstance(self.table[key], VectorSymbol):
+                    symbolType = 'vector'
+                if (isinstance(self.table[key], VariableSymbol) or isinstance(self.table[key], VectorSymbol)) and self.function:
                     position = ' at function \'' + self.function.name + '\''
                 else:
                     position = ''

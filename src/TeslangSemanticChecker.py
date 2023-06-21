@@ -94,7 +94,7 @@ class TeslangSemanticChecker(object):
             for param in node.fmlparams.parameters:
                 symbol = None
                 if param.type == 'vector':
-                    symbol = VectorSymbol(param.id, 1000) # TODO this is considered as a default size
+                    symbol = VectorSymbol(param.id, 1000) # TODO this is considered as a default size for vectors
                 else:
                     symbol = VariableSymbol(param.type, param.id, True)
                 if not child_table.put(symbol):
@@ -280,13 +280,14 @@ class TeslangSemanticChecker(object):
                         + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  
 
                 else:
-                    if node.index_expr.__class__.__name__ == 'LexToken' and node.index_expr.type == 'int':
-                        index_expr_value = node.index_expr.value
-                    else:
-                        index_expr_value = 1000 # TODO default considered index for identifier - should be handled better
-                    if symbol.length <= index_expr_value or index_expr_value < 0:
-                        self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
-                                          + node.id + '\' can hold only ' + str(symbol.length) + ' values')
+                    # TODO Handle the vector index out of range error
+                    # if node.index_expr.__class__.__name__ == 'LexToken' and node.index_expr.type == 'int':
+                    #     index_expr_value = node.index_expr.value
+                    # else:
+                    #     index_expr_value = 1000
+                    # if symbol.length <= index_expr_value or index_expr_value < 0:
+                    #     self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \''
+                    #                       + node.id + '\' can hold only ' + str(symbol.length) + ' values')
                     rightSideExprType = self.extract_expr_type(node.expr, table)
                     if rightSideExprType != 'int':
                         self.handle_error(node.pos, 'Invalid expression type in vector assignment. Vector can hold only \'int\' values but got \''

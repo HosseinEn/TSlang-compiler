@@ -233,45 +233,10 @@ class TeslangIRGenerator(object):
             intermediate_code += expr_register
         elif isinstance(symbol, VectorSymbol):
             pass
-            # rightSideExprType = self.extract_expr_type(node.expr, table)
-            # if rightSideExprType != 'vector':
-            #     self.handle_error(node.pos, 'Type mismatch in vector assignment. Expected \'vector\' but got \''
-            #                     + rightSideExprType + '\'')
-            # else:
-            #     if node.expr.__class__ == AST.ExprList:
-            #         exprsListNode = node.expr
-            #         symbol.length = len(exprsListNode.exprs)
-            #     elif node.expr.__class__ == AST.FunctionCall and node.expr.id == 'list':
-            #         node.expr.accept_ir_generation(table)
-            #         symbol.length = node.expr.args.exprs[0].value
         print(intermediate_code)
 
     def visit_VectorAssignment(self, node, table):
-        try:
-            index_type = self.extract_expr_type(node.index_expr, table)
-            if index_type != 'int':
-                self.handle_error(node.pos, 'Invalid index type in vector assignment. Expected \'int\' but got \'' + index_type + '\'')
-            
-            symbol = table.get(node.id)
-            if symbol is None:
-                self.handle_error(node.pos, 'Vector \'' + node.id + '\' not defined but used in assignment in function \'' +
-                                   table.function.name +'\'')
-            else:
-                symbol.mark_as_used()
-                if not isinstance(symbol, VectorSymbol):
-                    self.handle_error(node.pos, 'Can not use ' 
-                        + symbol.__class__.__name__ + ' \'' + symbol.name + '\' in vector assignment')  
-
-                else:
-                    if symbol.length <= node.index_expr.value or node.index_expr.value < 0:
-                        self.handle_error(node.pos, 'Index out of range in vector assignment. Vector \'' 
-                                          + node.id + '\' can hold only ' + str(symbol.length) + ' values')
-                    rightSideExprType = self.extract_expr_type(node.expr, table)
-                    if rightSideExprType != 'int':
-                        self.handle_error(node.pos, 'Invalid expression type in vector assignment. Vector can hold only \'int\' values but got \''
-                                           + rightSideExprType + '\'' + ' in function \'' + table.function.name + '\'')
-        except ExprNotFound:
-            pass
+        pass
 
     def visit_ReturnInstruction(self, node, table):
         expr_register = self.handle_expr_register_allocation(node.expr, table)
@@ -349,29 +314,10 @@ class TeslangIRGenerator(object):
 
 
     def visit_OperationOnList(self, node, table):
-        symbol = table.get(node.expr)
-        if symbol is None:
-            self.handle_error(node.pos, 'Vector \'' + node.expr + '\' not defined but used in operation in function \'' +
-                               table.function.name +'\'')
-        else:
-            id_type = symbol.type
-            if id_type != 'vector':
-                self.handle_error(node.pos, 'Identifier \'' +
-                                 node.expr + '\' expected to be \'vector\' but got \'' + id_type + '\'')
-            try:
-                if self.extract_expr_type(node.index_expr, table) != 'int':
-                    self.handle_error(node.pos, 'Invalid index type for \'' + symbol.name + '\'. Expected \'int\' but got \'' + self.extract_expr_type(node.index_expr, table) + '\'')        
-            except ExprNotFound:
-                pass
+        pass
 
     def visit_TernaryExpr(self, node, table):
-        if hasattr(node.cond, 'accept_ir_generation'):
-            node.cond.accept_ir_generation(table)
-        if hasattr(node.first_expr, 'accept_ir_generation'):
-            node.first_expr.accept_ir_generation(table)
-        if hasattr(node.second_expr, 'accept_ir_generation'):
-            node.second_expr.accept_ir_generation(table)
-
+        pass
 
     def get_register(self)-> str:
         rg_n = f'r{counters.register_counter}'

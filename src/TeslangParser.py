@@ -129,7 +129,6 @@ class TeslangParser(object):
         '''flist : empty
                 | TYPE ID
                 | TYPE ID COMMA flist'''
-        # TODO - potential bug
         if len(p) == 3:
             p[0] = ParametersList(parameters=[Parameter(type=p[1], id=p[2])])
         elif len(p) == 5:
@@ -177,7 +176,6 @@ class TeslangParser(object):
                 p[2].value = 0 if p[2].value else 1
             p[0] = p[2]
         else:
-            # TODO - potential bug
             if p.slice[1].type in ('NUMBER', 'STRING', 'ID'):
                 p[0] = p.slice[1]
             else:
