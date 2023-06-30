@@ -11,7 +11,8 @@ This project comprises:
 - Lexical Analysis
 - Parsing
 - Semantic Analysis
-- Code Generation
+- IR Code Generation
 - Symbol table with tree structure
 - Error Correction
-- Forward Referencing
+- Forward Referencing with pre-parse
+- Warning for unused variables and functions
