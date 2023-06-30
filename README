@@ -1,0 +1,1 @@
+This repository represents a compiler for TSLang language (The Simple Language), which has been written for the compiler course. TSLang compiler is supposed to perform lexical, syntax and semantic checks based on given grammar and generate intermediate code for errorless input code. 
