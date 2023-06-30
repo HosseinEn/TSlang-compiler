@@ -1,1 +1,17 @@
 This repository represents a compiler for TSLang language (The Simple Language), which has been written for the compiler course. TSLang compiler is supposed to perform lexical, syntax and semantic checks based on given grammar and generate intermediate code for errorless input code. 
+
+You can run generated IR code using https://github.com/aligrudi/tsvm VM. (There might still be some shortcomings in generated IR codes)
+
+
+
+====
+
+This project comprises:
+
+- Lexical Analysis
+- Parsing
+- Semantic Analysis
+- Code Generation
+- Symbol table with tree structure
+- Error Correction
+- Forward Referencing
